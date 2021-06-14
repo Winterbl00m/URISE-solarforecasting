@@ -1,0 +1,40 @@
+Overview:
+The Disaggregation Evaluation tool is a simple python script that evaluates the performance of energy disaggregation machine learning models. Researchers can see how well their training model works by using Pecan Street’s electricity data available on Dataport to compare their predicted data against actual data. Find the script file and the instructions for the tool below: 
+ 
+
+Python Script to evaluate performance:
+The script has been written in python3 and expects 3 arguments.
+        	•      	- - input_file: name of the file with actual data - Input file name should be of format truefile_dataid.csv and should be placed under /base_dir/pecan_street_data_kit/ directory. For example: truefile_186.csv
+        	•      	- - test_file: name of the file with predicted data.This is the file that will be compared with actual data or true data. File name should be of format testfile_dataid.csv and should be placed under /base_dir/pecan_street_data_kit/ directory. For example: testfile_186.csv
+        	•      	- - base_dir: this is the path where to copy the pecan street data kit. 
+ 
+Below is a sample command to run the script:
+ 
+   > python3 evaluate.py --input_file truefile_186.csv --test_file testfile_186.csv --base_dir /base_dir/pecan_street_data_kit/.
+ 
+If you would like to run the script on sample data first and see how it works, run the command below:
+ 
+   > python3 evaluate.py --input_file sample_truefile_186.csv --test_file sample_testfile_186.csv --base_dir /base_dir/pecan_street_data_kit/
+ 
+Once you run the file it will generate two output files under /base_dir/pecan_street_data_kit/
+ 
+        	•      	summary_output_dataid.txt: This file will contain the overall comparison of actual and predicted data.
+        	•      	absolute_errors_dataid.csv: This file will contain the absolute error calculated for each circuit and for each interval.
+ 
+ 
+How the script works:
+This script compares actual data (provided by Pecan Street) and predicted data (provided by end user).
+
+It expects the test files to be the same format as the actual data file (i.e. column names should be exactly the same). Data can only be tested for one home at a time. 
+  	
+  	The following are the checks performed on the predicted file:
+ 
+Presence of a circuit: This check will identify if the circuit is configured correctly. For example, if a home does not have air1 configured but you identified air1 in your predicted file, then this circuit will not be validated.
+Accuracy of predicted circuit values: For each validated circuit, the following metrics are calculated: 
+Mean Absolute error
+Mean Square error
+Root Mean Square error
+Absolute accuracy for each interval
+State of a circuit at each interval
+Circuit state: Each predicted circuit value is categorized in an ON/OFF state. If the value is less than 15W, then the appliance is considered OFF at that specific interval. Once the data is classified then the script will calculate metrics including accuracy score, precision score, recall score, and F1 score. 
+
