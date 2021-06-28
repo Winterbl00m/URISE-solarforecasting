@@ -25,4 +25,6 @@ def create_model(learning_rate, feature_layer):
     pass 
 
 
-def 
+def train_model():
+    """Train the model by feeding it data."""
+    pass 

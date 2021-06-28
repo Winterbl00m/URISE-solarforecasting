@@ -1,6 +1,3 @@
-# https://dataport.pecanstreet.org/static/static_files/New_York/1minute_data_newyork.tar.gz
-
-# https://dataport.pecanstreet.org/static/static_files/California/1minute_data_california.tar.gz
 import gzip
 import requests
 import os 
