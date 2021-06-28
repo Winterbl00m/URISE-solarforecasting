@@ -4,8 +4,7 @@
 import gzip
 import requests
 import os 
-import pandas as pd
-import tkinter as tk
+
 
 def download_data(url, filename):
     #Download timeseries data
@@ -26,36 +25,16 @@ def unzip_data(filename):
         file_content = f.read()
     return file_content
 
-def process_data():
-    #Step 3 process data
-    #TODO
-    pass
-
-def get_parameters():
-        window = tk.Tk() 
-    window.mainloop() 
-    button = tk.Button(
-    text="Click me!",
-    width=25,
-    height=5,
-    bg="blue",
-    fg="yellow",
-    )
-    def handle_click(event):
-    print("The button was clicked!")
-
-button = tk.Button(text="Click me!")
-
-button.bind("<Button-1>", handle_click)
-
 
 if __name__ == "__main__": 
-
-
-
+    #Change these for different Cities or times scales
     city = "New_York"
-    cityname = "newyork"
     time_frame = "15minute"
+
+    cityname = city.lower()
+    cityname = cityname.replace('_', '') 
+    # print(cityname)
+    
     url =  "https://dataport.pecanstreet.org/static/static_files/" + city + "/" + time_frame + "_data_" + cityname + ".tar.gz"
     filename = time_frame + "_data_" + cityname + ".tar.gz"
 
@@ -65,5 +44,6 @@ if __name__ == "__main__":
         download_metadata()
     if not os.path.isfile(filename):
         download_data(url, filename)
+        print(unzip_data(filename))
 
 
