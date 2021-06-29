@@ -3,6 +3,15 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers 
 
+def create_feature_layer(filename, current_time):
+    """
+    Creates a tf layer with the feature layer
+
+    filename: the name of the file with the data in it 
+    current_time : the time we want to get the features of
+    """
+    pass
+
 def create_model(learning_rate, feature_layer):
     """
     Creates an ANN model
