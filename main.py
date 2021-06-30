@@ -19,19 +19,22 @@ def create_model(learning_rate, feature_layer):
     learning_rate: float. The learning rate of the model. Between 0 and 1
     feature_layer: A tf layer.  Aka the input layer. The first layer of the model. 
     """
+    #Create Model
+    model = keras.Sequential()
 
     # Add the layer containing the features to the model.
     model.add(feature_layer)
 
-    #TODO: Define Hidden Layers
+    #Hidden Layers(RNN)
+    model.add(layers.SimpleRNN(128))
 
-    #TODO: Define output layer
+    model.add(layers.SimpleRNN(128))
 
-    #TODO: compile model
+    #Output layer
+    model.add(layers.Dense(N_LABELS, activation='sigmoid', name='output'))
 
-    #TODO: when done delte pass and uncomment out
-    #return model
-    pass 
+    return model
+     
 
 
 def train_model():

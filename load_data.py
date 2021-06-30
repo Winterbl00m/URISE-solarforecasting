@@ -25,7 +25,7 @@ def unzip_data(filename):
 
 if __name__ == "__main__": 
     #Change these for different Cities or times scales
-    city = "New_York"
+    city = "Austin"
     time_frame = "15minute"
 
     cityname = city.lower()
