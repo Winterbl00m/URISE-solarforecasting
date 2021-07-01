@@ -84,3 +84,39 @@ def create_combined_states(df):
         new_df[name] = df[list(x)].sum(axis = 1)
         # dataframe.sum will return the sum of the values over the requested axis
     return new_df
+
+
+psds = pd.read_csv('C:/Users/aaris/Downloads/15minute_data_austin.csv')
+
+a = psds.loc[35032:35035, 'local_15min']
+b = psds.loc[35032:35035, 'air1']
+c = psds.loc[35032:35035, 'clotheswasher1']
+d = psds.loc[35032:35035, 'dishwasher1']
+e = psds.loc[35032:35035, 'furnace1']
+f = psds.loc[35032:35035, 'refrigerator1']
+data = pd.DataFrame([[a], [b], [c], [d], [e], [f]])
+df = pd.DataFrame({"Time":[a],
+                 "air1":[b],
+                 "clotheswasher1":[c],
+                 "dishwasher1":[d],
+                 "furnace1":[e],
+                 "refigerator1":[f]})
+
+df.to_csv('output1.csv', index=False)
+df.insert(loc=6, column="Sum of Power", value=df.sum(axis=1))
+df.to_csv('output.csv', index=False)
+
+# print(psds.loc[psds['air1'] < 0])
+# psds.loc[['local_15min', 'air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1']]
+# psds.loc['1642':'2335':'2361':'2818':'3456', 'local_15min']
+# psds.loc['1642':'2335':'2361':'2818':'3456', 'air1']
+# psds.loc['1642':'2335':'2361':'2818':'3456', 'clotheswasher1']
+# psds.loc['1642':'2335':'2361':'2818':'3456', 'dishwasher1']
+# psds.loc['1642':'2335':'2361':'2818':'3456', 'furnace1']
+# psds.loc['1642':'2335':'2361':'2818':'3456', 'refrigerator1']
+
+# C - air1
+# S - clotheswasher1
+# W - dishwasher1
+# AB - furnace1
+# BK - refrigerator1
