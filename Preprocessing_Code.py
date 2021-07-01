@@ -23,9 +23,9 @@ df = pd.DataFrame({"Time":[a],
                  "dishwasher1":[d],
                  "furnace1":[e],
                  "refigerator1":[f]})
-df["sum"] = df.insert(6, "Sum of Power", df.sum(axis=1))
-df = df.fillna(value = 0,inplace = False)
-print(df)
+
+df.to_csv('output1.csv', index=False)
+df.insert(loc=6, column="Sum of Power", value=df.sum(axis=1))
 df.to_csv('output.csv', index=False)
 
 # 69679
