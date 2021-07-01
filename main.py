@@ -12,7 +12,7 @@ def create_feature_layer(filename, current_time):
     """
     pass
 
-def create_model(learning_rate, feature_layer):
+def create_model(learning_rate, feature_layer, N_LABELS):
     """
     Creates an ANN model
 
@@ -32,6 +32,11 @@ def create_model(learning_rate, feature_layer):
 
     #Output layer
     model.add(layers.Dense(N_LABELS, activation='sigmoid', name='output'))
+
+    #Compile Model
+    model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate),
+        loss='binary_crossentropy',
+        metrics=[tf.keras.losses.BinaryCrossentropy()])
 
     return model
      
