@@ -26,6 +26,7 @@ def load_data(filename):
 
 def create_feature_layer():
     """
+    TODO
     Creates a tf layer with the feature layer
 
     filename: the name of the file with the data in it 
@@ -35,6 +36,7 @@ def create_feature_layer():
 
 def create_dataset():
     """
+    TODO
     Creates a tf Dataset
     """
     pass
@@ -61,9 +63,10 @@ def create_model(learning_rate, feature_layer, N_LABELS):
     model.add(layers.Dense(N_LABELS, activation='sigmoid', name='output'))
 
     #Compile Model
-    model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate),
-        loss='binary_crossentropy',
-        metrics=[tf.keras.losses.BinaryCrossentropy()])
+    model.compile(
+        optimizer = tf.keras.optimizers.Adam(lr=learning_rate),
+        loss = tf.keras.losses.BinaryCrossentropy(),
+        metrics = tf.keras.metrics.BinaryAccuracy())
 
     return model
      
