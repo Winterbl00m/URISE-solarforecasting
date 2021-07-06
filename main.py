@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers 
 import pandas as pd
+import random 
 
 filename = 'C:/Users/aaris/Downloads/15minute_data_austin.csv'
 
@@ -24,24 +25,34 @@ def load_data(filename):
     return psds
 
 
-def create_feature_layer():
+def create_datasets(df, train_frac, val_frac):
     """
     TODO
-    Creates a tf layer with the feature layer
+    Creates a tf Datasets
 
-    filename: the name of the file with the data in it 
-    current_time : the time we want to get the features of
+    df: a panda's dataframe
+    train_frac: fraction of data for training(float between 0 and 1)
+    val_frac: fraction of data for validation(float between 0 and 1)
     """
+    
+    list_of_times = df['Time'].to_list()
+    train_num = len(list_of_times) * train_frac
+    val_num = len(list_of_times) * val_frac + train_num
+ 
+    random.shuffle(list_of_times)
+    train_times = list_of_times[:train_num]
+    val_times = list_of_times[train_num:val_num]
+    test_times = list_of_times[val_num:]
+
+
+    # target = df.pop('target')
+    # dataset = tf.data.Dataset.from_tensor_slices((df.values, target.values))
+
+
+
     pass
 
-def create_dataset():
-    """
-    TODO
-    Creates a tf Dataset
-    """
-    pass
-
-def create_model(learning_rate, feature_layer, N_LABELS):
+def create_model(learning_rate, feature_layer, number_of_outputs):
     """
     Creates an ANN model
 
@@ -55,12 +66,12 @@ def create_model(learning_rate, feature_layer, N_LABELS):
     model.add(feature_layer)
 
     #Hidden Layers(RNN)
-    model.add(layers.SimpleRNN(128))
+    model.add(layers.SimpleRNN(12))
 
-    model.add(layers.SimpleRNN(128))
+    model.add(layers.SimpleRNN(12))
 
     #Output layer
-    model.add(layers.Dense(N_LABELS, activation='sigmoid', name='output'))
+    model.add(layers.Dense(number_of_outputs, activation='sigmoid', name='output'))
 
     #Compile Model
     model.compile(
@@ -89,3 +100,19 @@ def train_model(model, train_dataset, val_dataset):
         validation_data=val_dataset.repeat(), 
         validation_steps=2
     )
+
+
+
+record = { 
+    'course_name': ['Data Structures', 'Python',
+                    'Machine Learning', 'Web Development'],
+    'student_name': ['Ankit', 'Shivangi', 
+                     'Priya', 'Shaurya'],
+    'student_city': ['Chennai', 'Pune', 
+                     'Delhi', 'Mumbai'],
+    'student_gender': ['M', 'F',
+                       'F', 'M'] }
+  
+# Creating a dataframe
+df = pd.DataFrame(record)
+create_datasets(df, train_frac= 0.6, val_frac = 0.2)
