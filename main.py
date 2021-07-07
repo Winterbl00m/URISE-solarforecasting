@@ -4,6 +4,7 @@ from tensorflow import keras
 from tensorflow.keras import layers 
 import pandas as pd
 import random 
+import os
 
 filename = 'C:/Users/aaris/Downloads/15minute_data_austin.csv'
 
@@ -14,28 +15,37 @@ def load_data(filename):
 
     filename: pecan street csv file
     """
-    psds = pd.read_csv(filename)
-    col_list = ['local_15min', 'air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1']
-    psds = psds[col_list]
-    psds = psds.loc[35032:69679]
-    psds = psds.rename(columns={"local_15min": "Time"})
-    psds.insert(loc=6, column="Sum of Power", value=psds.sum(axis=1))
-    psds.fillna(0, inplace=True)
-    psds.to_csv('preprocessingoutputfinal.csv', index=False)
+    if os.path.isfile('preprocessingoutputfinal.csv'):
+        psds = pd.read_csv('preprocessingoutputfinal.csv')
+        psds.fillna(0, inplace=True)
+    else:
+        psds = pd.read_csv(filename)
+        col_list = ['local_15min', 'air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1']
+        psds = psds[col_list]
+        psds = psds.loc[35032:69679]
+        psds = psds.rename(columns={"local_15min": "Time"})
+        psds.insert(loc=6, column="Sum of Power", value=psds.sum(axis=1))
+        psds.fillna(0, inplace=True)
+        psds.to_csv('preprocessingoutputfinal.csv', index=False)
 
     return psds
 
-
-def create_datasets(df, train_frac, val_frac):
+def split_data(df, train_frac, val_frac):
     """
-    TODO
-    Creates a tf Datasets
-
+    Splits the data into three list of times 
+    
+    Input
     df: a panda's dataframe
     train_frac: fraction of data for training(float between 0 and 1)
     val_frac: fraction of data for validation(float between 0 and 1)
+
+    Returns
+    train_times: the timestamps for the training dataset
+    val_times: the timestamps for the validation dataset
+    test_times: the timestamps for the testing dataset
+
     """
-    
+
     list_of_times = df['Time'].to_list()
 
     #Number of timestamps for each dataset
@@ -48,37 +58,58 @@ def create_datasets(df, train_frac, val_frac):
     val_times = list_of_times[train_num:val_num]
     test_times = list_of_times[val_num:]
 
+    return train_times, val_times, test_times
+
+def create_dataset(df, timestamps):
+    """
+    Creates a tf Dataset
+
+    Inputs
+    df: a panda's dataframe
+    timestamps: a list of timestamps to be included in the dataset
+
+    Returns
+    dataset: a tf dataset with the correct inputs and outputs 
+    """
+
+    #Create names for columns for input dataframe
+    column_lst = []
+    for x in range(4*24+1):
+        column_lst.append(str(x))
+
+
     #Create panadas dataframe for input and output
     output_pd = pd.DataFrame()
-    input_pd = pd.DataFrame()
+    input_pd = pd.DataFrame(columns = column_lst)
 
-    for timestamp in train_times:
+    
+
+    for timestamp in timestamps:
         index_of_time = df[df['Time'] == timestamp].index[0]
         initial_index = index_of_time - (24*4)
 
-        foo1 = df.loc[initial_index:index_of_time]['Sum of Power']
-        foo2 = foo1.transpose()
+        foo1 = df.loc[initial_index:index_of_time]['Sum of Power'].tolist()
+        input_pd.loc[len(input_pd)] = foo1
 
-        foo = df.loc[[index_of_time]]
-
-        output_pd = output_pd.append(foo, ignore_index=True)
-        input_pd = input_pd.append(foo2, ignore_index=True)
+        foo2 = df.loc[[index_of_time]]
+        output_pd = output_pd.append(foo2, ignore_index=True)
+        
 
     
     output_pd.pop('Time')
     output_pd.pop('Sum of Power')
-    print("output is")
-    print(output_pd.head())
-    print("input is")
-    print(input_pd.head())
-    # target = df.pop('target')
-    # dataset = tf.data.Dataset.from_tensor_slices((df.values, target.values))
+
+    # print("output is")
+    # print(output_pd.head())
+    # print("input is")
+    # print(input_pd.head())
+    
+    dataset = tf.data.Dataset.from_tensor_slices((input_pd.values, output_pd.values))
+
+    return dataset 
 
 
-
-    pass
-
-def create_feature_layer():
+def create_feature_layer(df):
     feature_columns = []
 
     time = tf.feature_column.numeric_column(df['Time'])
@@ -86,6 +117,7 @@ def create_feature_layer():
 
     my_feature_layer = layers.DenseFeatures(feature_columns)
     return my_feature_layer
+
 
 def create_model(learning_rate, my_feature_layer, number_of_outputs):
     """
@@ -136,6 +168,10 @@ def train_model(model, train_dataset, val_dataset):
         validation_steps=2
     )
 
-df = pd.read_csv('preprocessingoutputfinal.csv')
-# print(df.head)
-create_datasets(df, train_frac = .6, val_frac = .2)
+
+df = load_data(filename)
+train_frac = .6
+val_frac = .2
+
+train_times, val_times, test_times = split_data(df, train_frac, val_frac)
+create_dataset(df, timestamps = train_times)
