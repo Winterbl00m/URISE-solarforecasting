@@ -22,6 +22,7 @@ def load_data(filename):
     psds.insert(loc=6, column="Sum of Power", value=psds.sum(axis=1))
     psds.fillna(0, inplace=True)
     psds.to_csv('preprocessingoutputfinal.csv', index=False)
+
     return psds
 
 
@@ -36,15 +37,40 @@ def create_datasets(df, train_frac, val_frac):
     """
     
     list_of_times = df['Time'].to_list()
-    train_num = len(list_of_times) * train_frac
-    val_num = len(list_of_times) * val_frac + train_num
+
+    #Number of timestamps for each dataset
+    train_num = int(len(list_of_times) * train_frac)
+    val_num = int(len(list_of_times) * val_frac + train_num)
  
+    #Shuffles the list of times and splits it into val, test, and train
     random.shuffle(list_of_times)
     train_times = list_of_times[:train_num]
     val_times = list_of_times[train_num:val_num]
     test_times = list_of_times[val_num:]
 
+    #Create panadas dataframe for input and output
+    output_pd = pd.DataFrame()
+    input_pd = pd.DataFrame()
 
+    for timestamp in train_times:
+        index_of_time = df[df['Time'] == timestamp].index[0]
+        initial_index = index_of_time - (24*4)
+
+        foo1 = df.loc[initial_index:index_of_time]['Sum of Power']
+        foo2 = foo1.transpose()
+
+        foo = df.loc[[index_of_time]]
+
+        output_pd = output_pd.append(foo, ignore_index=True)
+        input_pd = input_pd.append(foo2, ignore_index=True)
+
+    
+    output_pd.pop('Time')
+    output_pd.pop('Sum of Power')
+    print("output is")
+    print(output_pd.head())
+    print("input is")
+    print(input_pd.head())
     # target = df.pop('target')
     # dataset = tf.data.Dataset.from_tensor_slices((df.values, target.values))
 
@@ -110,18 +136,6 @@ def train_model(model, train_dataset, val_dataset):
         validation_steps=2
     )
 
-
-
-record = { 
-    'course_name': ['Data Structures', 'Python',
-                    'Machine Learning', 'Web Development'],
-    'student_name': ['Ankit', 'Shivangi', 
-                     'Priya', 'Shaurya'],
-    'student_city': ['Chennai', 'Pune', 
-                     'Delhi', 'Mumbai'],
-    'student_gender': ['M', 'F',
-                       'F', 'M'] }
-  
-# Creating a dataframe
-df = pd.DataFrame(record)
-create_datasets(df, train_frac= 0.6, val_frac = 0.2)
+df = pd.read_csv('preprocessingoutputfinal.csv')
+# print(df.head)
+create_datasets(df, train_frac = .6, val_frac = .2)
