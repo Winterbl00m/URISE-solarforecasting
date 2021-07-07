@@ -52,7 +52,16 @@ def create_datasets(df, train_frac, val_frac):
 
     pass
 
-def create_model(learning_rate, feature_layer, number_of_outputs):
+def create_feature_layer():
+    feature_columns = []
+
+    time = tf.feature_column.numeric_column(df['Time'])
+    feature_columns.append(time)
+
+    my_feature_layer = layers.DenseFeatures(feature_columns)
+    return my_feature_layer
+
+def create_model(learning_rate, my_feature_layer, number_of_outputs):
     """
     Creates an ANN model
 
@@ -63,7 +72,7 @@ def create_model(learning_rate, feature_layer, number_of_outputs):
     model = keras.Sequential()
 
     # Add the layer containing the features to the model.
-    model.add(feature_layer)
+    model.add(my_feature_layer)
 
     #Hidden Layers(RNN)
     model.add(layers.SimpleRNN(12))
