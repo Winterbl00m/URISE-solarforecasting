@@ -30,6 +30,7 @@ def load_data(filename):
 
     return psds
 
+
 def split_data(df, train_frac, val_frac):
     """
     Splits the data into three list of times 
@@ -109,11 +110,15 @@ def create_dataset(df, timestamps):
     return dataset 
 
 
-def create_feature_layer(df):
+def create_feature_layer():
+    """
+    Create a the structure for a feature layer
+    """
     feature_columns = []
 
-    time = tf.feature_column.numeric_column(df['Time'])
-    feature_columns.append(time)
+    column_lst = []
+    for x in range(4*24+1):
+        feature_columns.append(tf.feature_column.numeric_column(str(x)))
 
     my_feature_layer = layers.DenseFeatures(feature_columns)
     return my_feature_layer
@@ -170,8 +175,8 @@ def train_model(model, train_dataset, val_dataset):
 
 
 df = load_data(filename)
-train_frac = .6
-val_frac = .2
+# train_frac = .6
+# val_frac = .2
 
-train_times, val_times, test_times = split_data(df, train_frac, val_frac)
-create_dataset(df, timestamps = train_times)
+# train_times, val_times, test_times = split_data(df, train_frac, val_frac)
+# create_dataset(df, timestamps = train_times)
