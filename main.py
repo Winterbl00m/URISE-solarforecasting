@@ -90,10 +90,12 @@ def create_dataset(df, timestamps):
         initial_index = index_of_time - (24*4)
 
         foo1 = df.loc[initial_index:index_of_time]['Sum of Power'].tolist()
-        input_pd.loc[len(input_pd)] = foo1
 
-        foo2 = df.loc[[index_of_time]]
-        output_pd = output_pd.append(foo2, ignore_index=True)
+        if len(foo1) == 97 :
+            input_pd.loc[len(input_pd)] = foo1
+
+            foo2 = df.loc[[index_of_time]]
+            output_pd = output_pd.append(foo2, ignore_index=True)
         
 
     
@@ -175,8 +177,8 @@ def train_model(model, train_dataset, val_dataset):
 
 
 df = load_data(filename)
-# train_frac = .6
-# val_frac = .2
+train_frac = .6
+val_frac = .2
 
-# train_times, val_times, test_times = split_data(df, train_frac, val_frac)
-# create_dataset(df, timestamps = train_times)
+train_times, val_times, test_times = split_data(df, train_frac, val_frac)
+create_dataset(df, timestamps = train_times)
