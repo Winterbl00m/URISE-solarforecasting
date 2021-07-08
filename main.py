@@ -126,7 +126,7 @@ def create_feature_layer():
     return my_feature_layer
 
 
-def create_model(learning_rate, my_feature_layer, number_of_outputs):
+def create_model(my_feature_layer, number_of_outputs):
     """
     Creates an ANN model
 
@@ -149,7 +149,7 @@ def create_model(learning_rate, my_feature_layer, number_of_outputs):
 
     #Compile Model
     model.compile(
-        optimizer = tf.keras.optimizers.Adam(lr=learning_rate),
+        optimizer = 'adam',
         loss = tf.keras.losses.BinaryCrossentropy(),
         metrics = tf.keras.metrics.BinaryAccuracy())
 
@@ -181,4 +181,10 @@ train_frac = .6
 val_frac = .2
 
 train_times, val_times, test_times = split_data(df, train_frac, val_frac)
-create_dataset(df, timestamps = train_times)
+train_dataset = create_dataset(df, timestamps = train_times)
+val_dataset = create_dataset(df, timestamps = val_times)
+test_dataset = create_dataset(df, timestamps = test_times)
+
+model = create_model(my_feature_layer = create_feature_layer(), number_of_outputs = 5)
+
+train_model(model, train_dataset, val_dataset)
