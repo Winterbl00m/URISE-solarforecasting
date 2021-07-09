@@ -85,7 +85,7 @@ def create_dataset(df, timestamps):
 
     
 
-    for timestamp in timestamps:
+    for timestamp in timestamps[0:5]:
         index_of_time = df[df['Time'] == timestamp].index[0]
         initial_index = index_of_time - (24*4)
 
@@ -102,10 +102,10 @@ def create_dataset(df, timestamps):
     output_pd.pop('Time')
     output_pd.pop('Sum of Power')
 
-    # print("output is")
-    # print(output_pd.head())
-    # print("input is")
-    # print(input_pd.head())
+    print("output is")
+    print(output_pd.head())
+    print("input is")
+    print(input_pd.head())
     
     dataset = tf.data.Dataset.from_tensor_slices((input_pd.values, output_pd.values))
 
@@ -177,14 +177,17 @@ def train_model(model, train_dataset, val_dataset):
 
 
 df = load_data(filename)
+
 train_frac = .6
 val_frac = .2
-
 train_times, val_times, test_times = split_data(df, train_frac, val_frac)
 train_dataset = create_dataset(df, timestamps = train_times)
 val_dataset = create_dataset(df, timestamps = val_times)
 test_dataset = create_dataset(df, timestamps = test_times)
+print(train_dataset)
 
-model = create_model(my_feature_layer = create_feature_layer(), number_of_outputs = 5)
+# print(train_dataset)
+# model = create_model(my_feature_layer = create_feature_layer(), number_of_outputs = 5)
 
-train_model(model, train_dataset, val_dataset)
+# train_model(model, train_dataset, val_dataset)
+
