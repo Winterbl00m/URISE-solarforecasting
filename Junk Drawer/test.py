@@ -3,6 +3,7 @@ from tensorflow import keras
 
 (x_train, y_train), (x_val, y_val) = keras.datasets.fashion_mnist.load_data()
 
+
 def preprocess(x, y):
     x = tf.cast(x, tf.float32) / 255.0
     y = tf.cast(y, tf.int64)
@@ -21,18 +22,22 @@ def create_dataset(xs, ys, n_classes=10):
 train_dataset = create_dataset(x_train, y_train)
 val_dataset = create_dataset(x_val, y_val)
 
-model = keras.Sequential([
-    keras.layers.Reshape(target_shape=(28 * 28,), input_shape=(28, 28)),
-    keras.layers.Dense(units=256, activation='relu'),
-    keras.layers.Dense(units=192, activation='relu'),
-    keras.layers.Dense(units=128, activation='relu'),
-    keras.layers.Dense(units=10, activation='softmax')
-])
+def create_model():
+    model = keras.Sequential([
+        keras.layers.Reshape(target_shape=(28 * 28,), input_shape=(28, 28)),
+        keras.layers.Dense(units=256, activation='relu'),
+        keras.layers.Dense(units=192, activation='relu'),
+        keras.layers.Dense(units=128, activation='relu'),
+        keras.layers.Dense(units=10, activation='softmax')
+    ])
 
-model.compile(optimizer='adam', 
-              loss=tf.losses.CategoricalCrossentropy(from_logits=True),
-              metrics=['accuracy'])
+    model.compile(optimizer='adam', 
+                  loss=tf.losses.CategoricalCrossentropy(from_logits=True),
+                  metrics=['accuracy'])
 
+    return model
+
+model = create_model()
 history = model.fit(
     train_dataset.repeat(), 
     epochs=10, 
