@@ -63,13 +63,8 @@ def create_dataset(df, indexes):
 
     
 
-<<<<<<< HEAD
-    for index in indexes[0:100]:
-        initial_index = index - (24*4)
-=======
     for index in indexes:
         initial_index = index - (NUM_SAMPLES-1)
->>>>>>> db116e8a580a6ae337689f26aaa5a89a3900acb7
 
         input_row = df.loc[initial_index:index]['Sum of Power'].tolist()
 
@@ -100,7 +95,7 @@ def create_model():
     
     """
     # Input Layer
-    input_layer = Input(shape=(NUM_SAMPLES,))
+    input_layer = Input(shape=(1,))
 
     #Hidden Layer(s)
     first_dense = Dense(units='128', activation='relu')(input_layer)
@@ -131,11 +126,7 @@ train_indexes, val_indexes, test_indexes = split_data(df, train_frac, val_frac)
 #Creates the Datasets
 train_dataset = create_dataset(df, indexes = train_indexes)
 val_dataset = create_dataset(df, indexes = val_indexes)
-<<<<<<< HEAD
-# test_dataset = create_dataset(df, timestamps = test_times)
-=======
 # test_dataset = create_dataset(df, indexes = test_indexes)
->>>>>>> db116e8a580a6ae337689f26aaa5a89a3900acb7
 
 # for element in train_dataset:
 #     print(element)
