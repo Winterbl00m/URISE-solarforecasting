@@ -1,13 +1,14 @@
+# Importing the libraries
 import tensorflow as tf
 from tensorflow import keras
 import pandas as pd
 import random 
-
-# Importing the libraries
 import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, Input
+
+NUM_SAMPLES = 97
 
 def split_data(df, train_frac, val_frac):
     """
@@ -52,7 +53,7 @@ def create_dataset(df, indexes):
     dataset: a tf dataset with the correct inputs and outputs 
     """
     column_lst = []
-    for column_name in range(4*24+1):
+    for column_name in range(NUM_SAMPLES):
         column_lst.append(str(column_name))
 
 
@@ -62,12 +63,17 @@ def create_dataset(df, indexes):
 
     
 
+<<<<<<< HEAD
     for index in indexes[0:100]:
         initial_index = index - (24*4)
+=======
+    for index in indexes:
+        initial_index = index - (NUM_SAMPLES-1)
+>>>>>>> db116e8a580a6ae337689f26aaa5a89a3900acb7
 
         input_row = df.loc[initial_index:index]['Sum of Power'].tolist()
 
-        if len(input_row) == 97 :
+        if len(input_row) == NUM_SAMPLES :
             input_df.loc[len(input_df)] = input_row
 
             output_row = df.loc[[index]]
@@ -78,6 +84,7 @@ def create_dataset(df, indexes):
     output_df.pop('Time')
     output_df.pop('Sum of Power')
 
+    #remove this line later
     output_df = output_df.pop('air1')
     
     dataset = tf.data.Dataset.from_tensor_slices((input_df.values, output_df.values))
@@ -88,41 +95,54 @@ def create_dataset(df, indexes):
 def create_model():
     """
     Adapted from https://github.com/katanaml/sample-apps/blob/master/04/multi-output-model.ipynb
+    Returns
+    model : a tf model with one or more output layers
+    
     """
-    # Define model layers.
-    input_layer = Input(shape=(97,))
+    # Input Layer
+    input_layer = Input(shape=(NUM_SAMPLES,))
 
+    #Hidden Layer(s)
     first_dense = Dense(units='128', activation='relu')(input_layer)
-    # Y1 output will be fed from the first dense
-    y1_output = Dense(units='1', name='refrigerator')(first_dense)
 
+    #Output Layer(s)
+    y1_output = Dense(units='1', name='air1')(first_dense)
+
+    #create tf model object
     model = Model(inputs=input_layer,outputs=[y1_output])
+
+    # Specify the optimizer, and compile the model with loss functions for both outputs
+    optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
+    model.compile(optimizer=optimizer,
+                  loss={'air1': 'mse'},
+                  metrics={'air1': tf.keras.metrics.RootMeanSquaredError()})
 
     return model
 
 
-
+#reads data from the preprocessed csv file
 df = pd.read_csv('preprocessingoutputfinal.csv')
 train_frac = .6
 val_frac = .2
+
+#Splits the data into train, val, and test
 train_indexes, val_indexes, test_indexes = split_data(df, train_frac, val_frac)
 
+#Creates the Datasets
 train_dataset = create_dataset(df, indexes = train_indexes)
 val_dataset = create_dataset(df, indexes = val_indexes)
+<<<<<<< HEAD
 # test_dataset = create_dataset(df, timestamps = test_times)
+=======
+# test_dataset = create_dataset(df, indexes = test_indexes)
+>>>>>>> db116e8a580a6ae337689f26aaa5a89a3900acb7
 
 # for element in train_dataset:
 #     print(element)
 
+#Create Model
 model = create_model()
 
-# Specify the optimizer, and compile the model with loss functions for both outputs
-optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
-model.compile(optimizer=optimizer,
-              loss={'refrigerator': 'mse'},
-              metrics={'refrigerator': tf.keras.metrics.RootMeanSquaredError()})
-
-
-# Train the model for 200 epochs
+# Train the model for 100 epochs
 history = model.fit(train_dataset,
                     epochs=100, validation_data=val_dataset)

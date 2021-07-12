@@ -17,3 +17,5 @@ path = 'C:/Users/aaris/Downloads/RNN-Preprocessing'
 dirs = os.listdir(path)
 for file in dirs:
     print(file)
+
+
