@@ -62,7 +62,7 @@ def create_dataset(df, indexes):
 
     
 
-    for index in indexes[0:1]:
+    for index in indexes[0:100]:
         initial_index = index - (24*4)
 
         input_row = df.loc[initial_index:index]['Sum of Power'].tolist()
@@ -111,9 +111,8 @@ train_dataset = create_dataset(df, indexes = train_indexes)
 val_dataset = create_dataset(df, indexes = val_indexes)
 # test_dataset = create_dataset(df, timestamps = test_times)
 
-for element in train_dataset:
-    print(element)
-
+# for element in train_dataset:
+#     print(element)
 
 model = create_model()
 
@@ -126,4 +125,4 @@ model.compile(optimizer=optimizer,
 
 # Train the model for 200 epochs
 history = model.fit(train_dataset,
-                    epochs=100, batch_size=10, validation_data=val_dataset)
+                    epochs=100, validation_data=val_dataset)
