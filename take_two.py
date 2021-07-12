@@ -3,8 +3,11 @@ from tensorflow import keras
 import pandas as pd
 import random 
 
-df = pd.read_csv('preprocessingoutputfinal.csv')
-
+# Importing the libraries
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Input
 
 def split_data(df, train_frac, val_frac):
     """
@@ -35,14 +38,6 @@ def split_data(df, train_frac, val_frac):
     test_indexes = index_lst[val_num:]
 
     return train_indexes, val_indexes, test_indexes
-
-
-
-train_frac = .6
-val_frac = .2
-train_indexes, val_indexes, test_indexes = split_data(df, train_frac, val_frac)
-
-
 
 
 def create_dataset(df, indexes):
@@ -82,14 +77,53 @@ def create_dataset(df, indexes):
     
     output_df.pop('Time')
     output_df.pop('Sum of Power')
+
+    output_df = output_df.pop('air1')
     
     dataset = tf.data.Dataset.from_tensor_slices((input_df.values, output_df.values))
 
     return dataset 
 
+
+def create_model():
+    """
+    Adapted from https://github.com/katanaml/sample-apps/blob/master/04/multi-output-model.ipynb
+    """
+    # Define model layers.
+    input_layer = Input(shape=(97,))
+
+    first_dense = Dense(units='128', activation='relu')(input_layer)
+    # Y1 output will be fed from the first dense
+    y1_output = Dense(units='1', name='refrigerator')(first_dense)
+
+    model = Model(inputs=input_layer,outputs=[y1_output])
+
+    return model
+
+
+
+df = pd.read_csv('preprocessingoutputfinal.csv')
+train_frac = .6
+val_frac = .2
+train_indexes, val_indexes, test_indexes = split_data(df, train_frac, val_frac)
+
 train_dataset = create_dataset(df, indexes = train_indexes)
+val_dataset = create_dataset(df, indexes = val_indexes)
+# test_dataset = create_dataset(df, timestamps = test_times)
 
 for element in train_dataset:
     print(element)
-# val_dataset = create_dataset(df, timestamps = val_times)
-# test_dataset = create_dataset(df, timestamps = test_times)
+
+
+model = create_model()
+
+# Specify the optimizer, and compile the model with loss functions for both outputs
+optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
+model.compile(optimizer=optimizer,
+              loss={'refrigerator': 'mse'},
+              metrics={'refrigerator': tf.keras.metrics.RootMeanSquaredError()})
+
+
+# Train the model for 200 epochs
+history = model.fit(train_dataset,
+                    epochs=100, batch_size=10, validation_data=val_dataset)
