@@ -6,7 +6,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.layers import Dense, Input, SimpleRNN
 
 NUM_SAMPLES = 97
 
@@ -61,8 +61,6 @@ def create_dataset(df, indexes):
     output_df = pd.DataFrame()
     input_df = pd.DataFrame(columns = column_lst)
 
-    
-
     for index in indexes[0:100]:
         initial_index = index - (NUM_SAMPLES-1)
 
@@ -73,18 +71,16 @@ def create_dataset(df, indexes):
 
             output_row = df.loc[[index]]
             output_df = output_df.append(output_row, ignore_index=True)
+
         
 
     
     output_df.pop('Time')
     output_df.pop('Sum of Power')
 
-    #remove this line later
-    output_df = output_df.pop('air1')
-    
-    dataset = tf.data.Dataset.from_tensor_slices((input_df.values, output_df.values))
+    # dataset = tf.data.Dataset.from_tensor_slices((input_df.values, output_df.values))
 
-    return dataset 
+    return input_df, output_df 
 
 
 def create_model():
@@ -95,28 +91,41 @@ def create_model():
     
     """
     # Input Layer
-    input_layer = Input(shape=(1,))
+    input_layer = Input(shape=(NUM_SAMPLES,))
 
     #Hidden Layer(s)
-    first_dense = Dense(units='128', activation='relu')(input_layer)
+    first_hidden_layer = Dense(units='128', activation='relu')(input_layer)
 
     #Output Layer(s)
-    y1_output = Dense(units='1', name='air1')(first_dense)
-
+    y1_output = Dense(units='1', name='air1')(first_hidden_layer)
+    y2_output = Dense(units='1', name='clotheswasher1')(first_hidden_layer)
+    y3_output = Dense(units='1', name='dishwasher1')(first_hidden_layer)
+    y4_output = Dense(units='1', name='furnace1')(first_hidden_layer)
+    y5_output = Dense(units='1', name='refrigerator1')(first_hidden_layer)
     #create tf model object
-    model = Model(inputs=input_layer,outputs=[y1_output])
+    model = Model(inputs=input_layer,outputs=[y1_output, y2_output, y3_output, y4_output, y5_output])
 
     # Specify the optimizer, and compile the model with loss functions for both outputs
     optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
     model.compile(optimizer=optimizer,
-                  loss={'air1': 'mse'},
-                  metrics={'air1': tf.keras.metrics.RootMeanSquaredError()})
+                  loss={'air1': 'mse',
+                  'clotheswasher1': 'mse',
+                  'dishwasher1' : 'mse',
+                  'furnace1' : 'mse',
+                  'refrigerator1' : 'mse'},
+
+                  metrics={'air1': tf.keras.metrics.RootMeanSquaredError(),
+                  'clotheswasher1': tf.keras.metrics.RootMeanSquaredError(),
+                  'dishwasher1' : tf.keras.metrics.RootMeanSquaredError(),
+                  'furnace1' : tf.keras.metrics.RootMeanSquaredError(),
+                  'refrigerator1' : tf.keras.metrics.RootMeanSquaredError()} )
 
     return model
 
 
 #reads data from the preprocessed csv file
 df = pd.read_csv('preprocessingoutputfinal.csv')
+
 train_frac = .6
 val_frac = .2
 
@@ -124,16 +133,18 @@ val_frac = .2
 train_indexes, val_indexes, test_indexes = split_data(df, train_frac, val_frac)
 
 #Creates the Datasets
-train_dataset = create_dataset(df, indexes = train_indexes)
-val_dataset = create_dataset(df, indexes = val_indexes)
-# test_dataset = create_dataset(df, indexes = test_indexes)
+train_x, train_y = create_dataset(df, indexes = train_indexes)
+val_x, val_y = create_dataset(df, indexes = val_indexes)
 
-# for element in train_dataset:
-#     print(element)
+# list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1']
+
+#Turns output data from a dataframe to five arrays
+train_y = train_y.pop('air1') , train_y.pop('clotheswasher1'), train_y.pop('dishwasher1'), train_y.pop('furnace1'), train_y.pop('refrigerator1')
+val_y = val_y.pop('air1') , val_y.pop('clotheswasher1'), val_y.pop('dishwasher1'), val_y.pop('furnace1'), val_y.pop('refrigerator1')
 
 #Create Model
 model = create_model()
 
 # Train the model for 100 epochs
-history = model.fit(train_dataset,
-                    epochs=100, validation_data=val_dataset)
+history = model.fit(train_x, train_y,
+                    epochs=100, batch_size=10, validation_data=(val_x,val_y))
