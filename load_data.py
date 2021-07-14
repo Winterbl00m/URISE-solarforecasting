@@ -12,8 +12,10 @@ psds['Time'] = pd.to_datetime(psds['Time'], utc=True, errors='coerce')
 # to_datetime turns values into datetimeindex, required to remove timezone
 psds['Time'] = psds['Time'].dt.tz_localize(None)
 # tz_localize(None) removes timezone from Time
-psds.insert(loc=6, column="Sum of Power", value=psds.sum(axis=1))
+psds = psds.sort_values(by='Time', ascending=True)
+# sorts values in ascending order of Time - data was not completely sorted originally
 psds.fillna(0, inplace=True)
+psds.insert(loc=6, column="Sum of Power", value=psds.sum(axis=1))
 # psds.to_csv('preprocessingoutputfinal.csv', index=False)
 
 # 1/1/2018 (1:00 pm) - 12/31/2018 (11:45 pm)
@@ -31,4 +33,4 @@ wds['Time'] = pd.to_datetime(wds['Time'], errors='coerce')
 
 combined = psds.merge(wds, how='outer')
 combined = combined.fillna(method='ffill')
-combined.to_csv('loadandweatherdata.csv', index=False)
+combined.to_csv('TESTloadandweatherdata.csv', index=False)
