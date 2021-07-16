@@ -63,7 +63,7 @@ def create_dataset(df, indexes):
     output_df = pd.DataFrame()
     input_df = pd.DataFrame(columns = column_lst)
 
-    for index in indexes[0:100]:
+    for index in indexes:
         initial_index = index - (NUM_SAMPLES-1)
 
         input_row = df.loc[initial_index:index]['Sum of Power'].tolist()
