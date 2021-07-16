@@ -7,6 +7,13 @@ dishwasher1 - AF
 furnace1 - AK
 refrigerator1 - BT
 
+air1 - C
+clotheswasher1 - S
+dishwasher1 - W
+furnace1 - AB
+refrigerator1 - BL
+solar - BP
+
 1/1/2018 (1:00 pm) - 12/31/2018 (11:45 pm)
 1642
 L - yes
