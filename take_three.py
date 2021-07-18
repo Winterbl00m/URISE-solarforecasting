@@ -9,6 +9,7 @@ import keras
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import LSTM
 from tensorflow.keras.layers import Dense, Input
+import matplotlib.pyplot as plt
 
 NUM_SAMPLES = 97
 
@@ -63,7 +64,7 @@ def create_dataset(df, indexes):
     output_df = pd.DataFrame()
     input_df = pd.DataFrame(columns = column_lst)
 
-    for index in indexes:
+    for index in indexes[0:100]:
         initial_index = index - (NUM_SAMPLES-1)
 
         input_row = df.loc[initial_index:index]['Sum of Power'].tolist()
@@ -94,9 +95,9 @@ def create_model():
     """
     # Input Layer
     input_layer = Input(shape=(NUM_SAMPLES,))
-    # input_size = some number
-    # somethingcool = tf.reshape(input_layer, [int(input_size/NUM_SAMPLES), 1, NUM_SAMPLES])
-    reshape_input = tf.reshape(input_layer, [10, 1, NUM_SAMPLES])
+    size_input = tf.size(input_layer)
+    reshape_input = tf.reshape(input_layer, [size_input/97, 1, NUM_SAMPLES])
+    
     # Hidden Layer(s)
     RNN_layer = LSTM(units=128)(reshape_input)
     first_hidden_layer = Dense(units='128', activation='relu')(RNN_layer)
@@ -109,7 +110,6 @@ def create_model():
     y5_output = Dense(units='1', name='refrigerator1')(first_hidden_layer)
     #create tf model object
     model = Model(inputs=input_layer,outputs=[y1_output, y2_output, y3_output, y4_output, y5_output])
-    print(model.summary())
 
     # Specify the optimizer, and compile the model with loss functions for both outputs
     optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
@@ -130,7 +130,7 @@ def create_model():
 
 
 #reads data from the preprocessed csv file
-df = pd.read_csv('preprocessingoutputfinal.csv')
+df = pd.read_csv('solar_load_weatherdata.csv')
 
 train_frac = .6
 val_frac = .2
@@ -154,3 +154,73 @@ model = create_model()
 # Train the model for 100 epochs
 history = model.fit(train_x, train_y,
                     epochs=100, batch_size=10, validation_data=(val_x,val_y))
+
+# Print model summary and export to take_three_modelsummary.txt
+print(model.summary())
+with open('take_three_modelsummary.txt', 'w') as f:
+
+    model.summary(print_fn=lambda x: f.write(x + '\n'))
+
+# Plot training and validation loss over epochs
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+epochs = range(1, len(loss) + 1)
+
+plt.figure()
+
+plt.plot(epochs, loss, color = 'blue', label='Training loss')
+plt.plot(epochs, val_loss, color = 'green', label='Validation loss')
+plt.title('Training and Validation Loss over Epochs')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+
+plt.show()
+
+# Plot training root-mean-squared error over epochs
+air_rmse = history.history['air1_root_mean_squared_error']
+clotheswasher_rmse = history.history['clotheswasher1_root_mean_squared_error']
+dishwasher_rmse = history.history['dishwasher1_root_mean_squared_error']
+furnace_rmse = history.history['furnace1_root_mean_squared_error']
+refrigerator_rmse = history.history['refrigerator1_root_mean_squared_error']
+
+epochs = range(1, len(air_rmse) + 1)
+
+plt.figure()
+
+plt.plot(epochs, air_rmse, color = 'blue', label='Air RMSE')
+plt.plot(epochs, clotheswasher_rmse, color = 'green', label='Clotheswaher RMSE')
+plt.plot(epochs, dishwasher_rmse, color = 'red', label='Dishwasher RMSE')
+plt.plot(epochs, furnace_rmse, color = 'purple', label='Furnace RMSE')
+plt.plot(epochs, refrigerator_rmse, color = 'orange', label='Refrigerator RMSE')
+
+plt.title('Training RMSE over Epochs')
+plt.xlabel('Epochs')
+plt.ylabel('RMSE')
+plt.legend()
+
+plt.show()
+
+# Plot validation root-mean-squared error over epochs
+val_air_rmse = history.history['val_air1_root_mean_squared_error']
+val_clotheswasher_rmse = history.history['val_clotheswasher1_root_mean_squared_error']
+val_dishwasher_rmse = history.history['val_dishwasher1_root_mean_squared_error']
+val_furnace_rmse = history.history['val_furnace1_root_mean_squared_error']
+val_refrigerator_rmse = history.history['val_refrigerator1_root_mean_squared_error']
+
+epochs = range(1, len(val_air_rmse) + 1)
+
+plt.figure()
+
+plt.plot(epochs, val_air_rmse, color = 'blue', label='Air RMSE')
+plt.plot(epochs, val_clotheswasher_rmse, color = 'green', label='Clotheswaher RMSE')
+plt.plot(epochs, val_dishwasher_rmse, color = 'red', label='Dishwasher RMSE')
+plt.plot(epochs, val_furnace_rmse, color = 'purple', label='Furnace RMSE')
+plt.plot(epochs, val_refrigerator_rmse, color = 'orange', label='Refrigerator RMSE')
+
+plt.title('Validation RMSE over Epochs')
+plt.xlabel('Epochs')
+plt.ylabel('RMSE')
+plt.legend()
+
+plt.show()
