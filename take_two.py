@@ -57,7 +57,6 @@ def create_dataset(df, indexes):
     for column_name in range(NUM_SAMPLES):
         column_lst.append(str(column_name))
 
-
     #Create panadas dataframe for input and output
     output_df = pd.DataFrame()
     input_df = pd.DataFrame(columns = column_lst)
@@ -72,14 +71,9 @@ def create_dataset(df, indexes):
 
             output_row = df.loc[[index]]
             output_df = output_df.append(output_row, ignore_index=True)
-
-        
-
-    
+  
     output_df.pop('Time')
     output_df.pop('Sum of Power')
-
-    # dataset = tf.data.Dataset.from_tensor_slices((input_df.values, output_df.values))
 
     return input_df, output_df 
 

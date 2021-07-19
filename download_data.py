@@ -1,7 +1,7 @@
 import gzip
 import requests
 import os 
-
+import pandas as pd
 
 def download_data(url, filename):
     #Download timeseries data
@@ -16,10 +16,11 @@ def download_metadata():
         file.write(data.content)
 
 
-def unzip_data(filename):
+def unzip_data(filename,csv_filename):
     #Unzip data
-    with gzip.open(filename, 'rb') as f:
-        file_content = f.read()
+    file_content = pd.read_csv(filename, compression='gzip', header=0, sep=' ', quotechar='"', error_bad_lines=False, encoding='latin1')
+    # os.remove(filename)
+    file_content.to_csv(csv_filename, index=False)
     return file_content
 
 
@@ -34,13 +35,15 @@ if __name__ == "__main__":
     
     url =  "https://dataport.pecanstreet.org/static/static_files/" + city + "/" + time_frame + "_data_" + cityname + ".tar.gz"
     filename = time_frame + "_data_" + cityname + ".tar.gz"
+    csv_filename = time_frame + "_data_" + cityname + ".csv"
 
 
     #If data is not already downloaded, downloads data
-    if not os.path.isfile('metadata.csv'):
-        download_metadata()
+    # if not os.path.isfile('metadata.csv'):
+    #     download_metadata()
     if not os.path.isfile(filename):
         download_data(url, filename)
-        print(unzip_data(filename))
+
+    print(unzip_data(filename, csv_filename).head())
 
 
