@@ -5,9 +5,9 @@ import pandas as pd
 import random 
 import numpy as np
 import matplotlib.pyplot as plt
+from tensorflow.keras.layers import concatenate
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import LSTM
-from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.layers import LSTM, Dense, Input
 import matplotlib.pyplot as plt
 
 
@@ -81,7 +81,8 @@ def create_dataset(df, indexes):
     output_df.pop('Sum of Power')
     output_df.pop('temperature')
 
-    return [power_input_df , temp_input_df] , output_df 
+    input_df = power_input_df.append(temp_input_df)
+    return power_input_df, temp_input_df , output_df 
 
 
 def create_ann_model():
@@ -131,29 +132,47 @@ def create_ann_model():
 def create_LSTM_model():
     """
     Adapted from https://github.com/katanaml/sample-apps/blob/master/04/multi-output-model.ipynb
+    and https://www.pyimagesearch.com/2019/02/04/keras-multiple-inputs-and-mixed-data/
     Returns
     model : a tf model with one or more output layers
     
     """
+    # Model A
     # Input Layer
-    input_layer = Input(shape=(NUM_SAMPLES,))
-    size_input = tf.size(input_layer)
-    reshape_input = tf.reshape(input_layer, [size_input/97, 1, NUM_SAMPLES])
-    
+    input_layerA = Input(shape=(NUM_SAMPLES,))
+    size_inputA = tf.size(input_layerA)
+    reshape_inputA = tf.reshape(input_layerA, [size_inputA/NUM_SAMPLES, 1, NUM_SAMPLES])
+    #Hidden Layers
+    x = LSTM(units=128)(reshape_inputA)
+    x = Dense(units='32', activation='relu')(x)
+    x = Model(inputs=input_layerA, outputs=x)
+
+    # Model B
+    # Input Layer
+    input_layerB = Input(shape=(NUM_SAMPLES,))
+    size_inputB = tf.size(input_layerB)
+    reshape_inputB = tf.reshape(input_layerB, [size_inputB/NUM_SAMPLES, 1, NUM_SAMPLES])
+    #Hidden Layers
+    y = LSTM(units=128)(reshape_inputB)
+    y = Dense(units='32', activation='relu')(y)
+    y = Model(inputs=input_layerB, outputs=y)
+
+    #Concatination Layer
+    combined = concatenate([x.output, y.output]) 
+
     # Hidden Layer(s)
-    RNN_layer = LSTM(units=128)(reshape_input)
-    first_hidden_layer = Dense(units='128', activation='relu')(RNN_layer)
+    z = Dense(units='128', activation='relu')(combined)
 
     #Output Layer(s)
-    y1_output = Dense(units='1', name='air1')(first_hidden_layer)
-    y2_output = Dense(units='1', name='clotheswasher1')(first_hidden_layer)
-    y3_output = Dense(units='1', name='dishwasher1')(first_hidden_layer)
-    y4_output = Dense(units='1', name='furnace1')(first_hidden_layer)
-    y5_output = Dense(units='1', name='refrigerator1')(first_hidden_layer)
-    y6_output = Dense(units='1', name='solar')(first_hidden_layer)
+    y1_output = Dense(units='1', name='air1')(z)
+    y2_output = Dense(units='1', name='clotheswasher1')(z)
+    y3_output = Dense(units='1', name='dishwasher1')(z)
+    y4_output = Dense(units='1', name='furnace1')(z)
+    y5_output = Dense(units='1', name='refrigerator1')(z)
+    y6_output = Dense(units='1', name='solar')(z)
 
     #create tf model object
-    model = Model(inputs=input_layer,outputs=[y1_output, y2_output, y3_output, y4_output, y5_output, y6_output])
+    model = Model(inputs=[x.input, y.input],outputs=[y1_output, y2_output, y3_output, y4_output, y5_output, y6_output])
 
     # Specify the optimizer, and compile the model with loss functions for both outputs
     optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
@@ -259,10 +278,10 @@ val_frac = .2
 train_indexes, val_indexes, test_indexes = split_data(df, train_frac, val_frac)
 
 #Creates the Datasets
-train_x, train_y = create_dataset(df, indexes = train_indexes)
-val_x, val_y = create_dataset(df, indexes = val_indexes)
+train_power, train_temp, train_y = create_dataset(df, indexes = train_indexes)
+val_power, val_temp, val_y = create_dataset(df, indexes = val_indexes)
 
-
+# print(train_x.shape)
 # list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
 
 #Turns output data from a dataframe to five arrays
@@ -273,8 +292,8 @@ val_y = val_y.pop('air1') , val_y.pop('clotheswasher1'), val_y.pop('dishwasher1'
 model = create_LSTM_model()
 
 # Train the model for 100 epochs
-history = model.fit(train_x[0], train_y,
-                    epochs=100, batch_size=10, validation_data=(val_x[0], val_y))
+history = model.fit([train_power, train_temp], train_y,
+                    epochs=100, batch_size=10, validation_data=([val_power, val_temp], val_y))
 
 # Print model summary and export to take_two_modelsummary.txt
 print(model.summary())
