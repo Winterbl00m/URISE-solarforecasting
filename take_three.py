@@ -5,7 +5,6 @@ import pandas as pd
 import random 
 import numpy as np
 import matplotlib.pyplot as plt
-import keras
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import LSTM
 from tensorflow.keras.layers import Dense, Input

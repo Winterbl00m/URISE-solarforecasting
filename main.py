@@ -175,7 +175,7 @@ def create_LSTM_model():
     return model
 
 
-def plot_loss(history)
+def plot_loss(history):
     # Plot trainig and validation loss over epochs
     loss = history.history['loss']
     val_loss = history.history['val_loss']
@@ -193,7 +193,7 @@ def plot_loss(history)
     plt.show()
 
 
-def plot_train_rmse(history)
+def plot_train_rmse(history):
     # Plot training root-mean-squared error over epochs
     air_rmse = history.history['air1_root_mean_squared_error']
     clotheswasher_rmse = history.history['clotheswasher1_root_mean_squared_error']
@@ -221,7 +221,7 @@ def plot_train_rmse(history)
     plt.show()
 
 
-def plot_val_rmse(history)
+def plot_val_rmse(history):
     # Plot validation root-mean-squared error over epochs
     val_air_rmse = history.history['val_air1_root_mean_squared_error']
     val_clotheswasher_rmse = history.history['val_clotheswasher1_root_mean_squared_error']
@@ -274,7 +274,7 @@ model = create_LSTM_model()
 
 # Train the model for 100 epochs
 history = model.fit(train_x[0], train_y,
-                    epochs=100, batch_size=10, validation_data=(val_x,val_y))
+                    epochs=100, batch_size=10, validation_data=(val_x[0], val_y))
 
 # Print model summary and export to take_two_modelsummary.txt
 print(model.summary())
