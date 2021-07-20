@@ -4,10 +4,11 @@ import numpy as np
 filename = 'C:/Users/aaris/Downloads/15minute_data_austin.csv'
 
 psds = pd.read_csv(filename)
-col_list = ['local_15min', 'air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
+col_list = ['local_15min', 'air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar', 'grid']
 psds = psds[col_list]
-psds = psds.rename(columns={"local_15min": "Time"})
 psds = psds.loc[35032:69679]
+psds = psds.rename(columns={"local_15min": "Time"})
+psds['solar'] *= -1
 psds['Time'] = psds['Time'].astype(str).str[:-6]
 # removes timezone from Time
 psds['Time'] = pd.to_datetime(psds['Time'], errors='coerce')
@@ -15,7 +16,7 @@ psds['Time'] = pd.to_datetime(psds['Time'], errors='coerce')
 psds = psds.sort_values(by='Time', ascending=True)
 # sorts values in ascending order of Time - data was not completely sorted originally
 psds.fillna(0, inplace=True)
-psds.insert(loc=7, column="Sum of Power", value=psds.drop('solar', axis=1).sum(axis=1))
+psds.insert(loc=8, column="Sum of Power", value=psds.drop(['solar', 'grid'], axis=1).sum(axis=1))
 
 # 1/1/2018 (1:00 pm) - 12/31/2018 (11:45 pm)
 # [163375:171273]
