@@ -5,9 +5,8 @@ import pandas as pd
 import random 
 import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras.layers import concatenate
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import LSTM, Dense, Input
+from tensorflow.keras.layers import LSTM, Dense, Input, concatenate
 import matplotlib.pyplot as plt
 
 
@@ -60,9 +59,9 @@ def create_dataset(df, indexes):
         column_lst.append(str(column_name))
 
     #Create panadas dataframe for input and output
-    power_input_df = pd.DataFrame(columns = column_lst)
-    temp_input_df = pd.DataFrame(columns = column_lst)
-    output_df = pd.DataFrame()
+    power_input_df = pd.DataFrame(columns = column_lst) #power time series data
+    temp_input_df = pd.DataFrame(columns = column_lst) #temperaturn time series data
+    output_df = pd.DataFrame() 
 
     for index in indexes[0:100]:
         initial_index = index - (NUM_SAMPLES-1)
@@ -81,52 +80,8 @@ def create_dataset(df, indexes):
     output_df.pop('Sum of Power')
     output_df.pop('temperature')
 
-    input_df = power_input_df.append(temp_input_df)
+    #return the two input dataframes and the output dataframe
     return power_input_df, temp_input_df , output_df 
-
-
-def create_ann_model():
-    """
-    Adapted from https://github.com/katanaml/sample-apps/blob/master/04/multi-output-model.ipynb
-    Returns
-    model : a tf model with one or more output layers
-    
-    """
-    # Input Layer
-    input_layer = Input(shape=(NUM_SAMPLES,))
-
-    #Hidden Layer(s)
-    first_hidden_layer = Dense(units='128', activation='relu')(input_layer)
-
-    #Output Layer(s)
-    y1_output = Dense(units='1', name='air1')(first_hidden_layer)
-    y2_output = Dense(units='1', name='clotheswasher1')(first_hidden_layer)
-    y3_output = Dense(units='1', name='dishwasher1')(first_hidden_layer)
-    y4_output = Dense(units='1', name='furnace1')(first_hidden_layer)
-    y5_output = Dense(units='1', name='refrigerator1')(first_hidden_layer)
-    y6_output = Dense(units='1', name='solar')(first_hidden_layer)
-
-    #create tf model object
-    model = Model(inputs=input_layer,outputs=[y1_output, y2_output, y3_output, y4_output, y5_output, y6_output])
-
-    # Specify the optimizer, and compile the model with loss functions for both outputs
-    optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
-    model.compile(optimizer=optimizer,
-                  loss={'air1': 'mse',
-                  'clotheswasher1': 'mse',
-                  'dishwasher1' : 'mse',
-                  'furnace1' : 'mse',
-                  'refrigerator1' : 'mse',
-                  'solar' : 'mse'},
-
-                  metrics={'air1': tf.keras.metrics.RootMeanSquaredError(),
-                  'clotheswasher1': tf.keras.metrics.RootMeanSquaredError(),
-                  'dishwasher1' : tf.keras.metrics.RootMeanSquaredError(),
-                  'furnace1' : tf.keras.metrics.RootMeanSquaredError(),
-                  'refrigerator1' : tf.keras.metrics.RootMeanSquaredError(),
-                  'solar' : tf.keras.metrics.RootMeanSquaredError()} )
-
-    return model
 
 
 def create_LSTM_model():
@@ -281,7 +236,6 @@ train_indexes, val_indexes, test_indexes = split_data(df, train_frac, val_frac)
 train_power, train_temp, train_y = create_dataset(df, indexes = train_indexes)
 val_power, val_temp, val_y = create_dataset(df, indexes = val_indexes)
 
-# print(train_x.shape)
 # list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
 
 #Turns output data from a dataframe to five arrays
