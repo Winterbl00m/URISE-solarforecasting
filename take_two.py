@@ -64,9 +64,9 @@ def create_dataset(df, indexes):
     for index in indexes[0:100]:
         initial_index = index - (NUM_SAMPLES-1)
 
-        input_row = df.loc[initial_index:index]['Sum of Power'].tolist()
+        input_row = df.loc[initial_index:index]['Sum of Power'].tolist() #+ df.loc[initial_index:index]['temperature'].tolist()
 
-        if len(input_row) == NUM_SAMPLES :
+        if len(input_row) == NUM_SAMPLES:
             input_df.loc[len(input_df)] = input_row
 
             output_row = df.loc[[index]]
@@ -74,6 +74,7 @@ def create_dataset(df, indexes):
   
     output_df.pop('Time')
     output_df.pop('Sum of Power')
+    output_df.pop('temperature')
 
     print(output_df.head())
     return input_df, output_df 
