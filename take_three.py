@@ -107,6 +107,7 @@ def create_model():
     y3_output = Dense(units='1', name='dishwasher1')(first_hidden_layer)
     y4_output = Dense(units='1', name='furnace1')(first_hidden_layer)
     y5_output = Dense(units='1', name='refrigerator1')(first_hidden_layer)
+
     #create tf model object
     model = Model(inputs=input_layer,outputs=[y1_output, y2_output, y3_output, y4_output, y5_output])
 
