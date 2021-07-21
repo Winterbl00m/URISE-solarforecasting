@@ -63,19 +63,25 @@ def create_dataset(df, indexes):
     temp_input_df = pd.DataFrame(columns = column_lst) #temperaturn time series data
     output_df = pd.DataFrame() 
 
-    for index in indexes[0:100]:
+    for index in indexes:
         initial_index = index - (NUM_SAMPLES-1)
 
+        #input rows
         power_input_row = df.loc[initial_index:index]['Sum of Power'].tolist()
         temp_input_row = df.loc[initial_index:index]['temperature'].tolist()
 
+        #Checks to make sure that there is complete data
         if (len(power_input_row) == len(temp_input_row) == NUM_SAMPLES):
+
+            #add input rows to input dataframes
             power_input_df.loc[len(power_input_df)] = power_input_row
             temp_input_df.loc[len(temp_input_df)] = temp_input_row
 
+            #adds ouput data to output dataframe
             output_row = df.loc[[index]]
             output_df = output_df.append(output_row, ignore_index=True)
-  
+
+    #Cleans output dataframe (not necessary but improves runtime)
     output_df.pop('Time')
     output_df.pop('Sum of Power')
     output_df.pop('temperature')
@@ -116,7 +122,7 @@ def create_LSTM_model():
     combined = concatenate([x.output, y.output]) 
 
     # Hidden Layer(s)
-    z = Dense(units='128', activation='relu')(combined)
+    z = Dense(units='16', activation='relu')(combined)
 
     #Output Layer(s)
     y1_output = Dense(units='1', name='air1')(z)
@@ -257,3 +263,4 @@ with open('take_two_modelsummary.txt', 'w') as f:
 plot_loss(history)
 plot_train_rmse(history)
 plot_val_rmse(history)
+
