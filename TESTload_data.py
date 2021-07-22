@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
-from geopy.geocoders import Nominatim
+from datetime import datetime, timedelta
+# import os
 
+# os.path
 filename = 'C:/Users/aaris/Downloads/15minute_data_austin.csv'
 dataid = 1642
 
@@ -34,12 +36,20 @@ psds.fillna(0, inplace=True)
 psds.insert(loc=8, column="Sum of Power", value=psds.drop('grid', axis=1).sum(axis=1))
 
 
-initialtime = psds['Time'].min()
-print(initialtime)
-finaltime = psds['Time'].max()
-print(finaltime)
+inittime = psds['Time'].min()
+fintime = psds['Time'].max()
+
 # 1/1/2018 (1:00 pm) - 12/31/2018 (11:45 pm)
 # [163375:171273]
+
+def hour_rounder(t):
+    # Rounds to nearest hour by adding a timedelta hour if minute >= 30
+    return (t.replace(second=0, microsecond=0, minute=0, hour=t.hour)
+               +timedelta(hours=t.minute//30))
+
+initialtime = hour_rounder(inittime)
+finaltime = hour_rounder(fintime)
+
 
 metadatafile = 'C:/Users/aaris/Downloads/metadata.csv'
 
@@ -47,23 +57,38 @@ mta = pd.read_csv(metadatafile)
 mtacolumns = ['dataid', 'city', 'state']
 mta = mta[mtacolumns]
 mta = mta.loc[mta['dataid'] == str(dataid)]
-city = mta['city']
+state = mta['state']
 
-geolocator = Nominatim()
+def find_latitude(state):
+    if (state == 'Texas').any():
+        latitude = 30.292432
 
-print(geolocator.geocode(city))
+    if (state == 'Colorado').any():
+        latitude = 40.027278
 
+    if (state == 'California').any():
+        latitude = 32.778033
+    
+    return latitude
 
 weatherfile = 'C:/Users/aaris/Downloads/ev_and_weather/ev_and_weather/weather.csv'
 
 wds = pd.read_csv(weatherfile)
-weather_columns = ['localhour', 'temperature']
+weather_columns = ['localhour', 'latitude', 'temperature']
 wds = wds[weather_columns]
 wds = wds.rename(columns={"localhour": "Time"})
 wds['Time'] = pd.to_datetime(wds['Time'], errors='coerce')
-wds = wds.set_index('Time')
+wds.to_csv('4TEST.csv', index=False)
+wds = wds.loc[wds['latitude'] == find_latitude(state)]
+wds = wds.drop('latitude', axis=1)
+wds = wds.sort_values(by='Time', ascending=True)
 
-wds = wds[initialtime:finaltime]
+itime = wds.index.get_loc(str(initialtime))
+ftime = wds.index.get_loc(str(finaltime))
+
+wds = wds[itime:ftime]
+
+wds.to_csv('3TEST.csv', index=False)
 
 combined = psds.merge(wds, how='outer')
 combined = combined.fillna(method='ffill')
