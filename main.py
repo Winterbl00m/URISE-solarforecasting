@@ -58,7 +58,7 @@ def create_dataset(df, indexes):
     for column_name in range(NUM_SAMPLES):
         column_lst.append(str(column_name))
 
-    #Create panadas dataframe for input and output
+    #Create pandas dataframe for input and output
     power_input_df = pd.DataFrame(columns = column_lst) #power time series data
     temp_input_df = pd.DataFrame(columns = column_lst) #temperaturn time series data
     output_df = pd.DataFrame() 
@@ -156,7 +156,7 @@ def create_LSTM_model():
 
 
 def plot_loss(history):
-    # Plot trainig and validation loss over epochs
+    # Plot training and validation loss over epochs
     loss = history.history['loss']
     val_loss = history.history['val_loss']
     epochs = range(1, len(loss) + 1)
