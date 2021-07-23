@@ -24,12 +24,17 @@ psds.insert(loc=8, column="Sum of Power", value=psds.drop(['solar', 'grid'], axi
 weatherfile = 'C:/Users/aaris/Downloads/ev_and_weather/ev_and_weather/weather.csv'
 
 wds = pd.read_csv(weatherfile)
-weather_columns = ['localhour', 'temperature']
+weather_columns = ['localhour', 'latitude', 'temperature', 'summary']
 wds = wds[weather_columns]
-wds = wds.loc[163375:171273]
-wds.set_index('localhour')
 wds = wds.rename(columns={"localhour": "Time"})
 wds['Time'] = pd.to_datetime(wds['Time'], errors='coerce')
+wds = wds.loc[wds['latitude'] == 30.292432]
+wds = wds.drop('latitude', axis=1)
+wds = wds.sort_values(by='Time', ascending=True)
+wds = wds.loc[wds['Time'] >= '2018']
+wds = wds.loc[wds['Time'] <= '2019']
+
+wds.to_csv('test1.csv', index=False)
 
 combined = psds.merge(wds, how='outer')
 combined = combined.fillna(method='ffill')
