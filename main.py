@@ -183,25 +183,7 @@ def create_LSTM_model():
     #create tf model object
     model = Model(inputs=[x.input, y.input],outputs=[y1_output, y2_output, y3_output, y4_output, y5_output, y6_output])
 
-    # Specify the optimizer, and compile the model with loss functions for both outputs
-    optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
-    model.compile(optimizer=optimizer,
-                  loss={'air1': 'mse',
-                  'clotheswasher1': 'mse',
-                  'dishwasher1' : 'mse',
-                  'furnace1' : 'mse',
-                  'refrigerator1' : 'mse',
-                  'solar' : 'mse'},
-
-                  metrics={'air1': tf.keras.metrics.RootMeanSquaredError(),
-                  'clotheswasher1': tf.keras.metrics.RootMeanSquaredError(),
-                  'dishwasher1' : tf.keras.metrics.RootMeanSquaredError(),
-                  'furnace1' : tf.keras.metrics.RootMeanSquaredError(),
-                  'refrigerator1' : tf.keras.metrics.RootMeanSquaredError(),
-                  'solar' : tf.keras.metrics.RootMeanSquaredError()} )
-
     return model
-
 
 def plot_loss(history):
     # Plot trainig and validation loss over epochs
@@ -279,9 +261,6 @@ def plot_val_rmse(history):
 
 #reads data from the preprocessed csv file
 df = pd.read_csv('solar_load_weatherdata.csv')
-# replace_dict = {'Overcast' : .25, 'Mostly Cloudy' : .5, 'Partly Cloudy': .75, 'Clear', 1}
-# df.replace()
-
 
 train_frac = .6
 val_frac = .2
@@ -299,8 +278,26 @@ val_power, val_temp, val_y = create_dataset(df, indexes = val_indexes)
 train_y = train_y.pop('air1') , train_y.pop('clotheswasher1'), train_y.pop('dishwasher1'), train_y.pop('furnace1'), train_y.pop('refrigerator1'), train_y.pop('solar')
 val_y = val_y.pop('air1') , val_y.pop('clotheswasher1'), val_y.pop('dishwasher1'), val_y.pop('furnace1'), val_y.pop('refrigerator1'), val_y.pop('solar')
 
-#Create Model
+# Create Model
 model = create_LSTM_model()
+
+# Specify the optimizer, and compile the model with loss functions for both outputs
+optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
+model.compile(optimizer=optimizer,
+                loss={'air1': 'mse',
+                'clotheswasher1': 'mse',
+                'dishwasher1' : 'mse',
+                'furnace1' : 'mse',
+                'refrigerator1' : 'mse',
+                'solar' : 'mse'},
+
+                metrics={'air1': tf.keras.metrics.RootMeanSquaredError(),
+                'clotheswasher1': tf.keras.metrics.RootMeanSquaredError(),
+                'dishwasher1' : tf.keras.metrics.RootMeanSquaredError(),
+                'furnace1' : tf.keras.metrics.RootMeanSquaredError(),
+                'refrigerator1' : tf.keras.metrics.RootMeanSquaredError(),
+                'solar' : tf.keras.metrics.RootMeanSquaredError()} )
+
 
 # Train the model for 100 epochs
 history = model.fit([train_power, train_temp], train_y,
@@ -315,3 +312,5 @@ plot_loss(history)
 plot_train_rmse(history)
 plot_val_rmse(history)
 
+# Save model
+model.save_weights('./model.ckpt')
