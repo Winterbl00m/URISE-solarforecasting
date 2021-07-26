@@ -10,17 +10,17 @@ tf_op_layer_Size (TensorFlowOpL [()]                 0           input_1[0][0]
 __________________________________________________________________________________________________
 tf_op_layer_Size_1 (TensorFlowO [()]                 0           input_2[0][0]                    
 __________________________________________________________________________________________________
-tf_op_layer_truediv/Cast (Tenso [()]                 0           tf_op_layer_Size[0][0]           
+tf_op_layer_Cast (TensorFlowOpL [()]                 0           tf_op_layer_Size[0][0]           
 __________________________________________________________________________________________________
-tf_op_layer_truediv_1/Cast (Ten [()]                 0           tf_op_layer_Size_1[0][0]         
+tf_op_layer_Cast_1 (TensorFlowO [()]                 0           tf_op_layer_Size_1[0][0]         
 __________________________________________________________________________________________________
-tf_op_layer_truediv (TensorFlow [()]                 0           tf_op_layer_truediv/Cast[0][0]   
+tf_op_layer_RealDiv (TensorFlow [()]                 0           tf_op_layer_Cast[0][0]           
 __________________________________________________________________________________________________
-tf_op_layer_truediv_1 (TensorFl [()]                 0           tf_op_layer_truediv_1/Cast[0][0] 
+tf_op_layer_RealDiv_1 (TensorFl [()]                 0           tf_op_layer_Cast_1[0][0]         
 __________________________________________________________________________________________________
-tf_op_layer_Reshape/Cast (Tenso [()]                 0           tf_op_layer_truediv[0][0]        
+tf_op_layer_Reshape/Cast (Tenso [()]                 0           tf_op_layer_RealDiv[0][0]        
 __________________________________________________________________________________________________
-tf_op_layer_Reshape_1/Cast (Ten [()]                 0           tf_op_layer_truediv_1[0][0]      
+tf_op_layer_Reshape_1/Cast (Ten [()]                 0           tf_op_layer_RealDiv_1[0][0]      
 __________________________________________________________________________________________________
 tf_op_layer_Reshape/shape (Tens [(3,)]               0           tf_op_layer_Reshape/Cast[0][0]   
 __________________________________________________________________________________________________

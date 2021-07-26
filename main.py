@@ -63,7 +63,7 @@ def create_dataset(df, indexes):
     temp_input_df = pd.DataFrame(columns = column_lst) #temperaturn time series data
     output_df = pd.DataFrame() 
 
-    for index in indexes:
+    for index in indexes[0:100]:
         initial_index = index - (NUM_SAMPLES-1)
 
         #input rows
@@ -88,6 +88,53 @@ def create_dataset(df, indexes):
 
     #return the two input dataframes and the output dataframe
     return power_input_df, temp_input_df , output_df 
+
+
+def create_model():
+    """
+    Adapted from https://github.com/katanaml/sample-apps/blob/master/04/multi-output-model.ipynb
+    Returns
+    model : a tf model with one or more output layers
+    
+    """
+    # Input Layer
+    input_layer = Input(shape=(NUM_SAMPLES,))
+    size_input = tf.size(input_layer)
+    reshape_input = tf.reshape(input_layer, [size_input/97, 1, NUM_SAMPLES])
+    
+    # Hidden Layer(s)
+    RNN_layer = LSTM(units=128)(reshape_input)
+    first_hidden_layer = Dense(units='128', activation='relu')(RNN_layer)
+
+    #Output Layer(s)
+    y1_output = Dense(units='1', name='air1')(first_hidden_layer)
+    y2_output = Dense(units='1', name='clotheswasher1')(first_hidden_layer)
+    y3_output = Dense(units='1', name='dishwasher1')(first_hidden_layer)
+    y4_output = Dense(units='1', name='furnace1')(first_hidden_layer)
+    y5_output = Dense(units='1', name='refrigerator1')(first_hidden_layer)
+    y6_output = Dense(units='1', name='solar')(first_hidden_layer)
+
+    #create tf model object
+    model = Model(inputs=input_layer,outputs=[y1_output, y2_output, y3_output, y4_output, y5_output, y6_output])
+
+    # Specify the optimizer, and compile the model with loss functions for both outputs
+    optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
+    model.compile(optimizer=optimizer,
+                  loss={'air1': 'mse',
+                  'clotheswasher1': 'mse',
+                  'dishwasher1' : 'mse',
+                  'furnace1' : 'mse',
+                  'refrigerator1' : 'mse',
+                  'solar' : 'mse'},
+
+                  metrics={'air1': tf.keras.metrics.RootMeanSquaredError(),
+                  'clotheswasher1': tf.keras.metrics.RootMeanSquaredError(),
+                  'dishwasher1' : tf.keras.metrics.RootMeanSquaredError(),
+                  'furnace1' : tf.keras.metrics.RootMeanSquaredError(),
+                  'refrigerator1' : tf.keras.metrics.RootMeanSquaredError(),
+                  'solar' : tf.keras.metrics.RootMeanSquaredError()} )
+
+    return model
 
 
 def create_LSTM_model():
@@ -230,7 +277,7 @@ def plot_val_rmse(history):
 
 
 #reads data from the preprocessed csv file
-df = pd.read_csv('solar_load_weatherdata.csv')
+df = pd.read_csv('solarinsumofpower.csv')
 
 train_frac = .6
 val_frac = .2
