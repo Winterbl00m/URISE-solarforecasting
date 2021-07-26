@@ -64,7 +64,7 @@ def create_dataset(df, indexes):
     temp_input_df = pd.DataFrame(columns = column_lst) #temperaturn time series data
     output_df = pd.DataFrame() 
 
-    for index in indexes:
+    for index in indexes[0:100]:
         initial_index = index - (NUM_SAMPLES-1)
 
         #input rows
@@ -258,59 +258,59 @@ def plot_val_rmse(history):
 
     plt.show()
 
+if __name__ == "__main__":
+    #reads data from the preprocessed csv file
+    df = pd.read_csv('solar_load_weatherdata.csv')
 
-#reads data from the preprocessed csv file
-df = pd.read_csv('solar_load_weatherdata.csv')
+    train_frac = .6
+    val_frac = .2
 
-train_frac = .6
-val_frac = .2
+    #Splits the data into train, val, and test
+    train_indexes, val_indexes, test_indexes = split_data(df, train_frac, val_frac)
 
-#Splits the data into train, val, and test
-train_indexes, val_indexes, test_indexes = split_data(df, train_frac, val_frac)
+    #Creates the Datasets
+    train_power, train_temp, train_y = create_dataset(df, indexes = train_indexes)
+    val_power, val_temp, val_y = create_dataset(df, indexes = val_indexes)
 
-#Creates the Datasets
-train_power, train_temp, train_y = create_dataset(df, indexes = train_indexes)
-val_power, val_temp, val_y = create_dataset(df, indexes = val_indexes)
+    # list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
 
-# list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
+    #Turns output data from a dataframe to five arrays
+    train_y = train_y.pop('air1') , train_y.pop('clotheswasher1'), train_y.pop('dishwasher1'), train_y.pop('furnace1'), train_y.pop('refrigerator1'), train_y.pop('solar')
+    val_y = val_y.pop('air1') , val_y.pop('clotheswasher1'), val_y.pop('dishwasher1'), val_y.pop('furnace1'), val_y.pop('refrigerator1'), val_y.pop('solar')
 
-#Turns output data from a dataframe to five arrays
-train_y = train_y.pop('air1') , train_y.pop('clotheswasher1'), train_y.pop('dishwasher1'), train_y.pop('furnace1'), train_y.pop('refrigerator1'), train_y.pop('solar')
-val_y = val_y.pop('air1') , val_y.pop('clotheswasher1'), val_y.pop('dishwasher1'), val_y.pop('furnace1'), val_y.pop('refrigerator1'), val_y.pop('solar')
+    # Create Model
+    model = create_LSTM_model()
 
-# Create Model
-model = create_LSTM_model()
+    # Specify the optimizer, and compile the model with loss functions for both outputs
+    optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
+    model.compile(optimizer=optimizer,
+                    loss={'air1': 'mse',
+                    'clotheswasher1': 'mse',
+                    'dishwasher1' : 'mse',
+                    'furnace1' : 'mse',
+                    'refrigerator1' : 'mse',
+                    'solar' : 'mse'},
 
-# Specify the optimizer, and compile the model with loss functions for both outputs
-optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
-model.compile(optimizer=optimizer,
-                loss={'air1': 'mse',
-                'clotheswasher1': 'mse',
-                'dishwasher1' : 'mse',
-                'furnace1' : 'mse',
-                'refrigerator1' : 'mse',
-                'solar' : 'mse'},
-
-                metrics={'air1': tf.keras.metrics.RootMeanSquaredError(),
-                'clotheswasher1': tf.keras.metrics.RootMeanSquaredError(),
-                'dishwasher1' : tf.keras.metrics.RootMeanSquaredError(),
-                'furnace1' : tf.keras.metrics.RootMeanSquaredError(),
-                'refrigerator1' : tf.keras.metrics.RootMeanSquaredError(),
-                'solar' : tf.keras.metrics.RootMeanSquaredError()} )
+                    metrics={'air1': tf.keras.metrics.RootMeanSquaredError(),
+                    'clotheswasher1': tf.keras.metrics.RootMeanSquaredError(),
+                    'dishwasher1' : tf.keras.metrics.RootMeanSquaredError(),
+                    'furnace1' : tf.keras.metrics.RootMeanSquaredError(),
+                    'refrigerator1' : tf.keras.metrics.RootMeanSquaredError(),
+                    'solar' : tf.keras.metrics.RootMeanSquaredError()} )
 
 
-# Train the model for 100 epochs
-history = model.fit([train_power, train_temp], train_y,
-                    epochs=100, batch_size=10, validation_data=([val_power, val_temp], val_y))
+    # Train the model for 100 epochs
+    history = model.fit([train_power, train_temp], train_y,
+                        epochs=100, batch_size=10, validation_data=([val_power, val_temp], val_y))
 
-# Print model summary and export to take_two_modelsummary.txt
-print(model.summary())
-with open('take_two_modelsummary.txt', 'w') as f:
-    model.summary(print_fn=lambda x: f.write(x + '\n'))
+    # Print model summary and export to take_two_modelsummary.txt
+    print(model.summary())
+    with open('take_two_modelsummary.txt', 'w') as f:
+        model.summary(print_fn=lambda x: f.write(x + '\n'))
 
-plot_loss(history)
-plot_train_rmse(history)
-plot_val_rmse(history)
+    plot_loss(history)
+    plot_train_rmse(history)
+    plot_val_rmse(history)
 
-# Save model
-model.save_weights('./model.ckpt')
+    # Save model
+    model.save_weights('./model.ckpt')
