@@ -54,20 +54,21 @@ def create_dataset(df, indexes):
     Returns
     dataset: a tf dataset with the correct inputs and outputs 
     """
+
     column_lst = []
     for column_name in range(NUM_SAMPLES):
         column_lst.append(str(column_name))
 
-    #Create pandas dataframe for input and output
+    #Create panadas dataframe for input and output
     power_input_df = pd.DataFrame(columns = column_lst) #power time series data
     temp_input_df = pd.DataFrame(columns = column_lst) #temperaturn time series data
     output_df = pd.DataFrame() 
 
-    for index in indexes[0:100]:
+    for index in indexes:
         initial_index = index - (NUM_SAMPLES-1)
 
         #input rows
-        power_input_row = df.loc[initial_index:index]['Sum of Power'].tolist()
+        power_input_row = df.loc[initial_index:index]['grid'].tolist()
         temp_input_row = df.loc[initial_index:index]['temperature'].tolist()
 
         #Checks to make sure that there is complete data
@@ -203,7 +204,7 @@ def create_LSTM_model():
 
 
 def plot_loss(history):
-    # Plot training and validation loss over epochs
+    # Plot trainig and validation loss over epochs
     loss = history.history['loss']
     val_loss = history.history['val_loss']
     epochs = range(1, len(loss) + 1)
@@ -277,7 +278,10 @@ def plot_val_rmse(history):
 
 
 #reads data from the preprocessed csv file
-df = pd.read_csv('solarinsumofpower.csv')
+df = pd.read_csv('solar_load_weatherdata.csv')
+# replace_dict = {'Overcast' : .25, 'Mostly Cloudy' : .5, 'Partly Cloudy': .75, 'Clear', 1}
+# df.replace()
+
 
 train_frac = .6
 val_frac = .2
