@@ -154,33 +154,46 @@ def plot_loss(history):
     plt.show()
 
 
-def plot_train_rmse(history):
+def plot_train_rmse(history, list_of_outputs):
     # Plot training root-mean-squared error over epochs
-    rmse = '_root_mean_squared_error'
+    rmse = 'root_mean_squared_error'
     plt.figure()
-    epochs = range(1, len(history.history[list_of_outputs[0] + rmse]) + 1)
+    if len(list_of_outputs) > 1:
+        epochs = range(1, len(history.history[list_of_outputs[0] + '_' + rmse]) + 1)
+        for output in list_of_outputs:
+            output_rmse = history.history[output + '_' + rmse]
+            plt.plot(epochs, output_rmse, label= output + ' rmse')
 
-    for output in list_of_outputs:
-        output_rmse = history.history[output + rmse]
-        plt.plot(epochs, output_rmse, label= output + ' rmse')
+    else:
+        epochs = range(1, len(history.history[rmse]) + 1)
+        for output in list_of_outputs:
+            output_rmse = history.history[rmse]
+            plt.plot(epochs, output_rmse, label= output + ' rmse')
 
     plt.title('Training RMSE over Epochs')
     plt.xlabel('Epochs')
     plt.ylabel('RMSE')
     plt.legend()
-
     plt.show()
 
 
-def plot_val_rmse(history):
+def plot_val_rmse(history, list_of_outputs):
     # Plot validation root-mean-squared error over epochs
-    rmse = '_root_mean_squared_error'
+    rmse = 'root_mean_squared_error'
     plt.figure()
-    epochs = range(1, len(history.history['val' + '_' + list_of_outputs[0] + rmse]) + 1)
 
-    for output in list_of_outputs:
-        output_rmse = history.history['val' + '_' + output + rmse]
-        plt.plot(epochs, output_rmse, label= output + ' rmse')
+    if len(list_of_outputs) > 1:
+        epochs = range(1, len(history.history['val' + '_' + list_of_outputs[0] + '_' + rmse]) + 1)
+        for output in list_of_outputs:
+            output_rmse = history.history['val' + '_' + output + '_' + rmse]
+            plt.plot(epochs, output_rmse, label= output + ' rmse')
+
+    else:
+        epochs = range(1, len(history.history['val' +  '_' + rmse]) + 1)
+        for output in list_of_outputs:
+            output_rmse = history.history['val' + '_' + rmse]
+            plt.plot(epochs, output_rmse, label= output + ' rmse')
+
 
     plt.title('Validation RMSE over Epochs')
     plt.xlabel('Epochs')
@@ -189,11 +202,19 @@ def plot_val_rmse(history):
 
     plt.show()
 
+
+def plot_rmse(history):
+    rmse = '_root_mean_squared_error'
+    train = plt.figure(1)
+    val = plt.figure(2)
+    both = plt.figure(3)
+
+
 if __name__ == "__main__":
     #reads data from the preprocessed csv file
     df = pd.read_csv('solar_load_weatherdata.csv')
     list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
-    list_of_outputs = ['air1','solar']
+    list_of_outputs = ['solar']
     train_frac = .6
     val_frac = .2
 
@@ -235,8 +256,8 @@ if __name__ == "__main__":
         model.summary(print_fn=lambda x: f.write(x + '\n'))
 
     plot_loss(history)
-    plot_train_rmse(history)
-    plot_val_rmse(history)
+    plot_train_rmse(history, list_of_outputs)
+    plot_val_rmse(history, list_of_outputs)
 
     # Save model
     model.save_weights('./model.ckpt')
