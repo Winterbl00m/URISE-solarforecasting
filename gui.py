@@ -7,4 +7,4 @@ window = tk.Tk()
 label = tk.Label(text="Which appliances are you inquiring about?", fg="black", bg="white")
 #Doesn't quotation marks comment things out? That is all commented out...
 
-window.rowconfigure(7, minisize=50, weight=1)
+window.rowconfigure(7, minsize=50, weight=1) 
