@@ -137,7 +137,7 @@ def create_LSTM_model(list_of_outputs):
 
 
 def plot_loss(history):
-    # Plot trainig and validation loss over epochs
+    # Plot training and validation loss over epochs
     loss = history.history['loss']
     val_loss = history.history['val_loss']
     epochs = range(1, len(loss) + 1)
