@@ -214,7 +214,7 @@ if __name__ == "__main__":
     #reads data from the preprocessed csv file
     df = pd.read_csv('solar_load_weatherdata.csv')
     list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
-    list_of_outputs = ['solar']
+    # list_of_outputs = ['solar']
     train_frac = .6
     val_frac = .2
 
@@ -260,4 +260,4 @@ if __name__ == "__main__":
     plot_val_rmse(history, list_of_outputs)
 
     # Save model
-    model.save_weights('./model.ckpt')
+    # model.save_weights('./model.ckpt')
