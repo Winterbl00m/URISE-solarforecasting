@@ -52,7 +52,7 @@ def create_dataset(df, indexes):
     indexes: a list of indexes to be included in the dataset
 
     Returns
-    dataset: a tf dataset with the correct inputs and outputs 
+    pandas dataframes with the correct inputs and outputs 
     """
 
     column_lst = []
@@ -83,62 +83,15 @@ def create_dataset(df, indexes):
             output_df = output_df.append(output_row, ignore_index=True)
 
     #Cleans output dataframe (not necessary but improves runtime)
-    output_df.pop('Time')
-    output_df.pop('Sum of Power')
-    output_df.pop('temperature')
+    # output_df.pop('Time')
+    # output_df.pop('Sum of Power')
+    # output_df.pop('temperature')
 
     #return the two input dataframes and the output dataframe
     return power_input_df, temp_input_df , output_df 
 
 
-def create_model():
-    """
-    Adapted from https://github.com/katanaml/sample-apps/blob/master/04/multi-output-model.ipynb
-    Returns
-    model : a tf model with one or more output layers
-    
-    """
-    # Input Layer
-    input_layer = Input(shape=(NUM_SAMPLES,))
-    size_input = tf.size(input_layer)
-    reshape_input = tf.reshape(input_layer, [size_input/97, 1, NUM_SAMPLES])
-    
-    # Hidden Layer(s)
-    RNN_layer = LSTM(units=128)(reshape_input)
-    first_hidden_layer = Dense(units='128', activation='relu')(RNN_layer)
-
-    #Output Layer(s)
-    y1_output = Dense(units='1', name='air1')(first_hidden_layer)
-    y2_output = Dense(units='1', name='clotheswasher1')(first_hidden_layer)
-    y3_output = Dense(units='1', name='dishwasher1')(first_hidden_layer)
-    y4_output = Dense(units='1', name='furnace1')(first_hidden_layer)
-    y5_output = Dense(units='1', name='refrigerator1')(first_hidden_layer)
-    y6_output = Dense(units='1', name='solar')(first_hidden_layer)
-
-    #create tf model object
-    model = Model(inputs=input_layer,outputs=[y1_output, y2_output, y3_output, y4_output, y5_output, y6_output])
-
-    # Specify the optimizer, and compile the model with loss functions for both outputs
-    optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
-    model.compile(optimizer=optimizer,
-                  loss={'air1': 'mse',
-                  'clotheswasher1': 'mse',
-                  'dishwasher1' : 'mse',
-                  'furnace1' : 'mse',
-                  'refrigerator1' : 'mse',
-                  'solar' : 'mse'},
-
-                  metrics={'air1': tf.keras.metrics.RootMeanSquaredError(),
-                  'clotheswasher1': tf.keras.metrics.RootMeanSquaredError(),
-                  'dishwasher1' : tf.keras.metrics.RootMeanSquaredError(),
-                  'furnace1' : tf.keras.metrics.RootMeanSquaredError(),
-                  'refrigerator1' : tf.keras.metrics.RootMeanSquaredError(),
-                  'solar' : tf.keras.metrics.RootMeanSquaredError()} )
-
-    return model
-
-
-def create_LSTM_model():
+def create_LSTM_model(list_of_outputs):
     """
     Adapted from https://github.com/katanaml/sample-apps/blob/master/04/multi-output-model.ipynb
     and https://www.pyimagesearch.com/2019/02/04/keras-multiple-inputs-and-mixed-data/
@@ -173,17 +126,15 @@ def create_LSTM_model():
     z = Dense(units='16', activation='relu')(combined)
 
     #Output Layer(s)
-    y1_output = Dense(units='1', name='air1')(z)
-    y2_output = Dense(units='1', name='clotheswasher1')(z)
-    y3_output = Dense(units='1', name='dishwasher1')(z)
-    y4_output = Dense(units='1', name='furnace1')(z)
-    y5_output = Dense(units='1', name='refrigerator1')(z)
-    y6_output = Dense(units='1', name='solar')(z)
+    output_layer_lst = []
+    for output in list_of_outputs:
+        output_layer_lst.append(Dense(units='1', name=output)(z))
 
     #create tf model object
-    model = Model(inputs=[x.input, y.input],outputs=[y1_output, y2_output, y3_output, y4_output, y5_output, y6_output])
+    model = Model(inputs=[x.input, y.input],outputs=output_layer_lst)
 
     return model
+
 
 def plot_loss(history):
     # Plot trainig and validation loss over epochs
@@ -205,23 +156,13 @@ def plot_loss(history):
 
 def plot_train_rmse(history):
     # Plot training root-mean-squared error over epochs
-    air_rmse = history.history['air1_root_mean_squared_error']
-    clotheswasher_rmse = history.history['clotheswasher1_root_mean_squared_error']
-    dishwasher_rmse = history.history['dishwasher1_root_mean_squared_error']
-    furnace_rmse = history.history['furnace1_root_mean_squared_error']
-    refrigerator_rmse = history.history['refrigerator1_root_mean_squared_error']
-    solar_rmse = history.history['solar_root_mean_squared_error']
-
-    epochs = range(1, len(air_rmse) + 1)
-
+    rmse = '_root_mean_squared_error'
     plt.figure()
+    epochs = range(1, len(history.history[list_of_outputs[0] + rmse]) + 1)
 
-    plt.plot(epochs, air_rmse, color = 'blue', label='Air RMSE')
-    plt.plot(epochs, clotheswasher_rmse, color = 'green', label='Clotheswaher RMSE')
-    plt.plot(epochs, dishwasher_rmse, color = 'red', label='Dishwasher RMSE')
-    plt.plot(epochs, furnace_rmse, color = 'purple', label='Furnace RMSE')
-    plt.plot(epochs, refrigerator_rmse, color = 'orange', label='Refrigerator RMSE')
-    plt.plot(epochs, solar_rmse, color = 'gold', label='Solar RMSE')
+    for output in list_of_outputs:
+        output_rmse = history.history[output + rmse]
+        plt.plot(epochs, output_rmse, label= output + ' rmse')
 
     plt.title('Training RMSE over Epochs')
     plt.xlabel('Epochs')
@@ -233,23 +174,13 @@ def plot_train_rmse(history):
 
 def plot_val_rmse(history):
     # Plot validation root-mean-squared error over epochs
-    val_air_rmse = history.history['val_air1_root_mean_squared_error']
-    val_clotheswasher_rmse = history.history['val_clotheswasher1_root_mean_squared_error']
-    val_dishwasher_rmse = history.history['val_dishwasher1_root_mean_squared_error']
-    val_furnace_rmse = history.history['val_furnace1_root_mean_squared_error']
-    val_refrigerator_rmse = history.history['val_refrigerator1_root_mean_squared_error']
-    val_solar_rmse = history.history['val_solar_root_mean_squared_error']
-
-    epochs = range(1, len(val_air_rmse) + 1)
-
+    rmse = '_root_mean_squared_error'
     plt.figure()
+    epochs = range(1, len(history.history['val' + '_' + list_of_outputs[0] + rmse]) + 1)
 
-    plt.plot(epochs, val_air_rmse, color = 'blue', label='Air RMSE')
-    plt.plot(epochs, val_clotheswasher_rmse, color = 'green', label='Clotheswaher RMSE')
-    plt.plot(epochs, val_dishwasher_rmse, color = 'red', label='Dishwasher RMSE')
-    plt.plot(epochs, val_furnace_rmse, color = 'purple', label='Furnace RMSE')
-    plt.plot(epochs, val_refrigerator_rmse, color = 'orange', label='Refrigerator RMSE')
-    plt.plot(epochs, val_solar_rmse, color = 'gold', label='Solar RMSE')
+    for output in list_of_outputs:
+        output_rmse = history.history['val' + '_' + output + rmse]
+        plt.plot(epochs, output_rmse, label= output + ' rmse')
 
     plt.title('Validation RMSE over Epochs')
     plt.xlabel('Epochs')
@@ -261,7 +192,8 @@ def plot_val_rmse(history):
 if __name__ == "__main__":
     #reads data from the preprocessed csv file
     df = pd.read_csv('solar_load_weatherdata.csv')
-
+    list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
+    list_of_outputs = ['air1','solar']
     train_frac = .6
     val_frac = .2
 
@@ -272,32 +204,26 @@ if __name__ == "__main__":
     train_power, train_temp, train_y = create_dataset(df, indexes = train_indexes)
     val_power, val_temp, val_y = create_dataset(df, indexes = val_indexes)
 
-    # list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
-
     #Turns output data from a dataframe to five arrays
-    train_y = train_y.pop('air1') , train_y.pop('clotheswasher1'), train_y.pop('dishwasher1'), train_y.pop('furnace1'), train_y.pop('refrigerator1'), train_y.pop('solar')
-    val_y = val_y.pop('air1') , val_y.pop('clotheswasher1'), val_y.pop('dishwasher1'), val_y.pop('furnace1'), val_y.pop('refrigerator1'), val_y.pop('solar')
+    foo1 = []
+    foo2 = []
+    for output in list_of_outputs:
+        foo1.append(train_y.pop(output)) 
+        foo2.append(val_y.pop(output))
+    train_y = foo1
+    val_y = foo2
 
     # Create Model
-    model = create_LSTM_model()
+    model = create_LSTM_model(list_of_outputs)
 
     # Specify the optimizer, and compile the model with loss functions for both outputs
     optimizer = tf.keras.optimizers.SGD(learning_rate=0.001)
-    model.compile(optimizer=optimizer,
-                    loss={'air1': 'mse',
-                    'clotheswasher1': 'mse',
-                    'dishwasher1' : 'mse',
-                    'furnace1' : 'mse',
-                    'refrigerator1' : 'mse',
-                    'solar' : 'mse'},
-
-                    metrics={'air1': tf.keras.metrics.RootMeanSquaredError(),
-                    'clotheswasher1': tf.keras.metrics.RootMeanSquaredError(),
-                    'dishwasher1' : tf.keras.metrics.RootMeanSquaredError(),
-                    'furnace1' : tf.keras.metrics.RootMeanSquaredError(),
-                    'refrigerator1' : tf.keras.metrics.RootMeanSquaredError(),
-                    'solar' : tf.keras.metrics.RootMeanSquaredError()} )
-
+    loss_dict = {}
+    metrics_dict = {}
+    for output in list_of_outputs:
+        loss_dict[output] = 'mse'
+        metrics_dict[output] = tf.keras.metrics.RootMeanSquaredError()
+    model.compile(optimizer=optimizer, loss = loss_dict, metrics = metrics_dict)
 
     # Train the model for 100 epochs
     history = model.fit([train_power, train_temp], train_y,

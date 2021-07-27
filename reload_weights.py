@@ -13,8 +13,10 @@ from main import create_dataset
 
 df = pd.read_csv('solar_load_weatherdata.csv')
 
+list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
+
 # Load saved model weights
-model = create_LSTM_model()
+model = create_LSTM_model(list_of_outputs)
 
 model.load_weights('./model.ckpt')
 
