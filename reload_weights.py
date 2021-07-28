@@ -32,7 +32,7 @@ def pred_index(df, initialindex, finalindex):
 in1 = 29000
 in2 = 29100
 
-x, y, z = create_dataset(df, indexes = pred_index(df, in1, in2))
+x, y, z = create_dataset(df, indexes = pred_index(df, in1, in2), list_of_outputs = list_of_outputs)
 prediction = model.predict([x, y])
 
 # Locate time on which data is predicted
