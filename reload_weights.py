@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import LSTM, Dense, Input, concatenate
 import matplotlib.pyplot as plt
-from main import create_LSTM_model
-from main import create_dataset
+from LSTM_model import create_LSTM_model
+from LSTM_model import create_dataset
 
 df = pd.read_csv('solar_load_weatherdata.csv')
 

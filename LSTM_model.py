@@ -82,7 +82,7 @@ def create_dataset(df, indexes, list_of_outputs):
             output_df = output_df.append(output_row, ignore_index=True)
 
 
-    #Turns output data from a dataframe to n arrays
+    #Turns output data from a dataframe to a list of one column dataframes
     output = []
     for item in list_of_outputs:
         output.append(output_df.pop(item)) 
