@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 # import os
 
 # os.path
-filename = 'C:/Users/aaris/Downloads/15minute_data_austin.csv'
+filename = '15minute_data_austin.csv'
 dataid = 1642
 
 # read file
@@ -13,8 +13,14 @@ psds = pd.read_csv(filename)
 # locates all rows for household
 psds = psds[psds['dataid'] == dataid]
 
+col_list = psds.columns.tolist()
+col_list.remove('dataid')
+col_list.remove('leg1v')
+col_list.remove('leg2v')
+print(col_list)
+
 # locates columns for time, specific appliances, and total power (grid)
-col_list = ['local_15min', 'air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar', 'grid']
+# col_list = ['local_15min', 'air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar', 'grid']
 psds = psds[col_list]
 
 psds = psds.rename(columns={"local_15min": "Time"})
@@ -33,7 +39,7 @@ psds = psds.sort_values(by='Time', ascending=True)
 psds.fillna(0, inplace=True)
 
 # create sum of power for simpler aggregated data
-psds.insert(loc=8, column="Sum of Power", value=psds.drop('grid', axis=1).sum(axis=1))
+psds.insert(loc= len(psds.columns), column="Sum of Power", value=psds.drop('grid', axis=1).sum(axis=1))
 
 
 inittime = psds['Time'].min()
@@ -55,7 +61,7 @@ print(initialtime)
 y = pd.to_datetime(finaltime)
 print(finaltime)
 
-metadatafile = 'C:/Users/aaris/Downloads/metadata.csv'
+metadatafile = 'metadata.csv'
 
 mta = pd.read_csv(metadatafile)
 mtacolumns = ['dataid', 'city', 'state']
@@ -75,7 +81,7 @@ def find_latitude(state):
     
     return latitude
 
-weatherfile = 'C:/Users/aaris/Downloads/ev_and_weather/ev_and_weather/weather.csv'
+weatherfile = 'weather.csv'
 
 wds = pd.read_csv(weatherfile)
 weather_columns = ['localhour', 'latitude', 'temperature', 'summary']
