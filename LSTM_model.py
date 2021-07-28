@@ -67,7 +67,7 @@ def create_dataset(df, indexes, list_of_outputs):
         initial_index = index - (NUM_SAMPLES-1)
 
         #input rows
-        power_input_row = df.loc[initial_index:index]['grid'].tolist()
+        power_input_row = df.loc[initial_index:index]['Sum of Power'].tolist()
         temp_input_row = df.loc[initial_index:index]['temperature'].tolist()
 
         #Checks to make sure that there is complete data
@@ -206,7 +206,15 @@ def plot_val_rmse(history, list_of_outputs):
 if __name__ == "__main__":
     #reads data from the preprocessed csv file
     df = pd.read_csv('solar_load_weatherdata.csv')
-    list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
+    list_of_outputs = df.columns.tolist()
+    list_of_outputs.remove('Time')
+    list_of_outputs.remove('grid')
+    list_of_outputs.remove('Sum of Power')
+    list_of_outputs.remove('temperature')
+    list_of_outputs.remove('summary')
+
+    print(list_of_outputs)
+    # list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
     train_frac = .6
     val_frac = .2
 
