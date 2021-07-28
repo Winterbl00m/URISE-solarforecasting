@@ -9,7 +9,6 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import LSTM, Dense, Input, concatenate
 import matplotlib.pyplot as plt
 
-
 NUM_SAMPLES = 97
 
 def split_data(df, train_frac, val_frac):
@@ -43,7 +42,7 @@ def split_data(df, train_frac, val_frac):
     return train_indexes, val_indexes, test_indexes
 
 
-def create_dataset(df, indexes):
+def create_dataset(df, indexes, list_of_outputs):
     """
     Creates a tf Dataset
 
@@ -82,13 +81,14 @@ def create_dataset(df, indexes):
             output_row = df.loc[[index]]
             output_df = output_df.append(output_row, ignore_index=True)
 
-    #Cleans output dataframe (not necessary but improves runtime)
-    # output_df.pop('Time')
-    # output_df.pop('Sum of Power')
-    # output_df.pop('temperature')
+
+    #Turns output data from a dataframe to n arrays
+    output = []
+    for item in list_of_outputs:
+        output.append(output_df.pop(item)) 
 
     #return the two input dataframes and the output dataframe
-    return power_input_df, temp_input_df , output_df 
+    return power_input_df, temp_input_df , output 
 
 
 def create_LSTM_model(list_of_outputs):
@@ -203,18 +203,10 @@ def plot_val_rmse(history, list_of_outputs):
     plt.show()
 
 
-def plot_rmse(history):
-    rmse = '_root_mean_squared_error'
-    train = plt.figure(1)
-    val = plt.figure(2)
-    both = plt.figure(3)
-
-
 if __name__ == "__main__":
     #reads data from the preprocessed csv file
     df = pd.read_csv('solar_load_weatherdata.csv')
     list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
-    # list_of_outputs = ['solar']
     train_frac = .6
     val_frac = .2
 
@@ -222,17 +214,8 @@ if __name__ == "__main__":
     train_indexes, val_indexes, test_indexes = split_data(df, train_frac, val_frac)
 
     #Creates the Datasets
-    train_power, train_temp, train_y = create_dataset(df, indexes = train_indexes)
-    val_power, val_temp, val_y = create_dataset(df, indexes = val_indexes)
-
-    #Turns output data from a dataframe to five arrays
-    foo1 = []
-    foo2 = []
-    for output in list_of_outputs:
-        foo1.append(train_y.pop(output)) 
-        foo2.append(val_y.pop(output))
-    train_y = foo1
-    val_y = foo2
+    train_power, train_temp, train_y = create_dataset(df, indexes = train_indexes, list_of_outputs = list_of_outputs)
+    val_power, val_temp, val_y = create_dataset(df, indexes = val_indexes, list_of_outputs = list_of_outputs)
 
     # Create Model
     model = create_LSTM_model(list_of_outputs)
