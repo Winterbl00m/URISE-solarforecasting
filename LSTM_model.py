@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import LSTM, Dense, Input, concatenate
 import matplotlib.pyplot as plt
+from tensorflow.keras.utils import plot_model
 
 NUM_SAMPLES = 97
 
@@ -252,3 +253,9 @@ if __name__ == "__main__":
 
     # Save model
     # model.save_weights('./model.ckpt')
+
+    # Plot model inputs and outputs in block form
+    # import os
+    # os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz/bin/'
+
+    # plot_model(model, to_file='model.png')
