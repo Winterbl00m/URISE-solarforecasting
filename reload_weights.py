@@ -29,19 +29,22 @@ def pred_index(df, initialindex, finalindex):
     
     return predict_indexes
 
-x, y, z = create_dataset(df, indexes = pred_index(df, 30446, 30542), list_of_outputs = list_of_outputs)
+in1 = 29000
+in2 = 29100
+
+x, y, z = create_dataset(df, indexes = pred_index(df, in1, in2), list_of_outputs = list_of_outputs)
 prediction = model.predict([x, y])
 
 # Locate time on which data is predicted
-predictiontime = df['Time'].loc[30446:30541]
+predictiontime = df['Time'].loc[in1:(in2-1)]
 
 # Locate actual energy data
-actualair = df['air1'].loc[30446:30541]
-actualclotheswasher = df['clotheswasher1'].loc[30446:30541]
-actualdishwasher = df['dishwasher1'].loc[30446:30541]
-actualfurnace = df['furnace1'].loc[30446:30541]
-actualrefrigerator = df['refrigerator1'].loc[30446:30541]
-actualsolar = df['solar'].loc[30446:30541]
+actualair = df['air1'].loc[in1:(in2-1)]
+actualclotheswasher = df['clotheswasher1'].loc[in1:(in2-1)]
+actualdishwasher = df['dishwasher1'].loc[in1:(in2-1)]
+actualfurnace = df['furnace1'].loc[in1:(in2-1)]
+actualrefrigerator = df['refrigerator1'].loc[in1:(in2-1)]
+actualsolar = df['solar'].loc[in1:(in2-1)]
 
 
 # Plot predicted vs. actual
@@ -50,7 +53,7 @@ plt.figure()
 plt.plot(predictiontime, actualair, color = 'green', label='actual')
 plt.plot(predictiontime, prediction[0], color = 'blue', label='predicted')
 
-plt.title('11/14/2018 air1 Prediction')
+plt.title('air1 Prediction')
 plt.ylabel('EGauge Energy')
 plt.xlabel('Time')
 plt.legend()
@@ -63,7 +66,7 @@ plt.figure()
 plt.plot(predictiontime, actualclotheswasher, color = 'green', label='actual')
 plt.plot(predictiontime, prediction[1], color = 'blue', label='predicted')
 
-plt.title('11/14/2018 clotheswasher1 Prediction')
+plt.title('clotheswasher1 Prediction')
 plt.ylabel('EGauge Energy')
 plt.xlabel('Time')
 plt.legend()
@@ -76,7 +79,7 @@ plt.figure()
 plt.plot(predictiontime, actualdishwasher, color = 'green', label='actual')
 plt.plot(predictiontime, prediction[2], color = 'blue', label='predicted')
 
-plt.title('11/14/2018 dishwasher1 Prediction')
+plt.title('dishwasher1 Prediction')
 plt.ylabel('EGauge Energy')
 plt.xlabel('Time')
 plt.legend()
@@ -89,7 +92,7 @@ plt.figure()
 plt.plot(predictiontime, actualfurnace, color = 'green', label='actual')
 plt.plot(predictiontime, prediction[3], color = 'blue', label='predicted')
 
-plt.title('11/14/2018 furnace1 Prediction')
+plt.title('furnace1 Prediction')
 plt.ylabel('EGauge Energy')
 plt.xlabel('Time')
 plt.legend()
@@ -102,7 +105,7 @@ plt.figure()
 plt.plot(predictiontime, actualrefrigerator, color = 'green', label='actual')
 plt.plot(predictiontime, prediction[4], color = 'blue', label='predicted')
 
-plt.title('11/14/2018 refrigerator1 Prediction')
+plt.title('refrigerator1 Prediction')
 plt.ylabel('EGauge Energy')
 plt.xlabel('Time')
 plt.legend()
@@ -115,7 +118,7 @@ plt.figure()
 plt.plot(predictiontime, actualsolar, color = 'green', label='actual')
 plt.plot(predictiontime, prediction[5], color = 'blue', label='predicted')
 
-plt.title('11/14/2018 solar Prediction')
+plt.title('solar Prediction')
 plt.ylabel('EGauge Energy')
 plt.xlabel('Time')
 plt.legend()
