@@ -1,11 +1,8 @@
-
 from tkinter import *
 
 window = Tk() 
 window.title('Appliance Selection') 
 window.geometry('500x300')
-
-var = StringVar()
 
 def displaySelected():
     appliances = []
@@ -15,16 +12,19 @@ def displaySelected():
         appliances.append(op)
     for val in appliances:
         print(val)
+    return appliances 
 
 display = Label(window, text = "Please select which appliances you would like to be disaggregated.", font = ("Times", 14), padx = 10, pady = 10)
 display.pack() 
+
 lb = Listbox(window, selectmode = "multiple")
 lb.pack(padx = 10, pady = 10, expand = YES, fill = "both") 
 
 x =["air1", "solar", "clotheswasher1", "refrigerator1", "furnace1", "dishwasher1"]
+
 for item in range(len(x)): 
 	lb.insert(END, x[item]) 
-	lb.itemconfig(item, bg="#bdc1d6") 
+	# lb.itemconfig(item, bg="#bdc1d6") 
 
 Button(window, text="Create Model", command=displaySelected).pack()
 window.mainloop()
