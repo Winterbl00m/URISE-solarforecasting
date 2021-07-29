@@ -214,6 +214,9 @@ if __name__ == "__main__":
     list_of_outputs.remove('temperature')
     list_of_outputs.remove('summary')
 
+    for item in list_of_outputs:
+        if df[item][0] == None:
+            list_of_outputs.remove(item)
     print(list_of_outputs)
     # list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
     train_frac = .6

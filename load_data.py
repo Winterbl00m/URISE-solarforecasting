@@ -36,7 +36,7 @@ psds['Time'] = pd.to_datetime(psds['Time'], errors='coerce')
 psds = psds.sort_values(by='Time', ascending=True)
 
 # fill empty cells with 0
-psds.fillna(0, inplace=True)
+psds.fillna(None, inplace=True)
 
 # create sum of power for simpler aggregated data
 psds.insert(loc= len(psds.columns), column="Sum of Power", value=psds.drop('grid', axis=1).sum(axis=1))
