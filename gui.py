@@ -1,6 +1,8 @@
 from tkinter import *
 from LSTM_model import *
 
+
+
 def make_model(list_of_outputs):
     #reads data from the preprocessed csv file
     df = pd.read_csv('solar_load_weatherdata.csv')
@@ -36,12 +38,8 @@ def make_model(list_of_outputs):
     with open('take_two_modelsummary.txt', 'w') as f:
         model.summary(print_fn=lambda x: f.write(x + '\n'))
     
-    plot_loss(history)
-    plot_train_rmse(history, list_of_outputs)
-    plot_val_rmse(history, list_of_outputs)
     # Save model
     # model.save_weights('./model.ckpt')
-
 
 def displaySelected():
     appliances = []
@@ -73,6 +71,23 @@ if __name__ == "__main__":
         # lb.itemconfig(item, bg="#bdc1d6") 
 
     Button(window, text="Create Model", command=displaySelected).pack()
+    # setting the title
+    window.title('Plotting in Tkinter')
+
+    # dimensions of the main window
+    window.geometry("500x500")
+
+    # button that displays the plot
+    plot_button = Button(master = window,
+                        command = plot,
+                        height = 2,
+                        width = 10,
+                        text = "Plot")
+
+    # place the button
+    # in main window
+    plot_button.pack()
+
     window.mainloop()
 
 
