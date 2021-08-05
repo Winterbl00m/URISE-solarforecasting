@@ -10,9 +10,13 @@ from tensorflow.keras.layers import LSTM, Dense, Input, concatenate
 import matplotlib.pyplot as plt
 from tensorflow.keras.utils import plot_model
 
+from plot import show_plots
+
 from tkinter import *
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from functools import partial
+from tkinter import ttk
 
 NUM_SAMPLES = 97
 
@@ -141,144 +145,10 @@ def create_LSTM_model(list_of_outputs):
     return model
 
 
-def plot_loss(history):
-    # Plot training and validation loss over epochs
-    loss = history.history['loss']
-    val_loss = history.history['val_loss']
-    epochs = range(1, len(loss) + 1)
-
-    plt.figure()
-
-    plt.plot(epochs, loss, color = 'blue', label='Training loss')
-    plt.plot(epochs, val_loss, color = 'green', label='Validation loss')
-    plt.title('Training and Validation Loss over Epochs')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
-
-    plt.show()
-
-
-def plot_train_rmse(history, list_of_outputs):
-    # Plot training root-mean-squared error over epochs
-    rmse = 'root_mean_squared_error'
-    plt.figure()
-    if len(list_of_outputs) > 1:
-        epochs = range(1, len(history.history[list_of_outputs[0] + '_' + rmse]) + 1)
-        for output in list_of_outputs:
-            output_rmse = history.history[output + '_' + rmse]
-            plt.plot(epochs, output_rmse, label= output + ' rmse')
-
-    else:
-        epochs = range(1, len(history.history[rmse]) + 1)
-        for output in list_of_outputs:
-            output_rmse = history.history[rmse]
-            plt.plot(epochs, output_rmse, label= output + ' rmse')
-
-    plt.title('Training RMSE over Epochs')
-    plt.xlabel('Epochs')
-    plt.ylabel('RMSE')
-    plt.legend()
-    plt.show()
-
-
-def plot_val_rmse(history, list_of_outputs):
-    # Plot validation root-mean-squared error over epochs
-    rmse = 'root_mean_squared_error'
-    plt.figure()
-
-    if len(list_of_outputs) > 1:
-        epochs = range(1, len(history.history['val' + '_' + list_of_outputs[0] + '_' + rmse]) + 1)
-        for output in list_of_outputs:
-            output_rmse = history.history['val' + '_' + output + '_' + rmse]
-            plt.plot(epochs, output_rmse, label= output + ' rmse')
-
-    else:
-        epochs = range(1, len(history.history['val' +  '_' + rmse]) + 1)
-        for output in list_of_outputs:
-            output_rmse = history.history['val' + '_' + rmse]
-            plt.plot(epochs, output_rmse, label= output + ' rmse')
-
-
-    plt.title('Validation RMSE over Epochs')
-    plt.xlabel('Epochs')
-    plt.ylabel('RMSE')
-    plt.legend()
-
-    plt.show()
-
-
-def plot(history, list_of_outputs):
-    # the figure that will contain the plot
-    fig = Figure(figsize = (5, 5))
-
-    # adding the subplots
-    loss_plot = fig.add_subplot(311)
-    train_rmse_plot = fig.add_subplot(312)
-    val_rmse_plot = fig.add_subplot(313)
-
-    # Plot training and validation loss over epochs
-    loss = history.history['loss']
-    val_loss = history.history['val_loss']
-    epochs = range(1, len(loss) + 1)
-    rmse = 'root_mean_squared_error'
-
-    # plotting loss
-    loss_plot.plot(epochs, loss, color = 'blue', label='Training loss')
-    loss_plot.plot(epochs, val_loss, color = 'green', label='Validation loss')
-    loss_plot.title.set_text('Training and Validation Loss over Epochs')
-    loss_plot.set_xlabel('Epochs')
-    loss_plot.set_ylabel('Loss')
-    loss_plot.legend()
-
-	# plotting RMSE
-    if len(list_of_outputs) > 1:
-        for output in list_of_outputs:
-            output_rmse = history.history[output + '_' + rmse]
-            train_rmse_plot.plot(epochs, output_rmse, label= output + ' rmse')
-            val_output_rmse = history.history['val' + '_' + output + '_' + rmse]
-            val_rmse_plot.plot(epochs, val_output_rmse, label= output + ' rmse')
-    else:
-        for output in list_of_outputs:
-            output_rmse = history.history[rmse]
-            train_rmse_plot.plot(epochs, output_rmse, label= output + ' rmse')
-            val_output_rmse = history.history['val' + '_' + rmse]
-            val_rmse_plot.plot(epochs, val_output_rmse, label= output + ' rmse')
-
-    train_rmse_plot.title.set_text('Training RMSE over Epochs')
-    train_rmse_plot.set_xlabel('Epochs')
-    train_rmse_plot.set_ylabel('Loss')
-    train_rmse_plot.legend()
-
-    val_rmse_plot.title.set_text('Validation RMSE over Epochs')
-    val_rmse_plot.set_xlabel('Epochs')
-    val_rmse_plot.set_ylabel('Loss')
-    val_rmse_plot.legend()
-
-    # creating the Tkinter canvas
-    # containing the Matplotlib figure
-    canvas = FigureCanvasTkAgg(fig, master = window)
-    canvas.draw()
-
-    # placing the canvas on the Tkinter window
-    canvas.get_tk_widget().pack()
-
-
-if __name__ == "__main__":
+def make_model(list_of_outputs):
     #reads data from the preprocessed csv file
     df = pd.read_csv('solar_load_weatherdata.csv')
-    list_of_outputs = df.columns.tolist()
-    list_of_outputs.remove('Time')
-    list_of_outputs.remove('grid')
-    list_of_outputs.remove('Sum of Power')
-    list_of_outputs.remove('temperature')
-    list_of_outputs.remove('summary')
-
-    for item in list_of_outputs:
-        if df[item][0] == None:
-            list_of_outputs.remove(item)
-    print(list_of_outputs)
-    list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
+    # list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
     train_frac = .6
     val_frac = .2
 
@@ -309,35 +179,7 @@ if __name__ == "__main__":
     print(model.summary())
     with open('take_two_modelsummary.txt', 'w') as f:
         model.summary(print_fn=lambda x: f.write(x + '\n'))
-
     
-    # the main Tkinter window
-    window = Tk()
-
-    # setting the title
-    window.title('Plotting in Tkinter')
-
-    # dimensions of the main window
-    window.geometry("500x1500")
-
-    # button that displays the plot
-    plot_button = Button(master = window,
-                        command = plot(history, list_of_outputs),
-                        height = 2,
-                        width = 10,
-                        text = "Plot")
-
-    # place the button
-    # in main window
-    plot_button.pack()
-
-    # run the gui
-    window.mainloop()
-
-    # plot_loss(history)
-    # plot_train_rmse(history, list_of_outputs)
-    # plot_val_rmse(history, list_of_outputs)
-
     # Save model
     # model.save_weights('./model.ckpt')
 
@@ -346,4 +188,34 @@ if __name__ == "__main__":
     # os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz/bin/'
 
     # plot_model(model, to_file='model.png')
+    return history
 
+if __name__ == "__main__":
+    #reads data from the preprocessed csv file
+    df = pd.read_csv('solar_load_weatherdata.csv')
+    list_of_outputs = df.columns.tolist()
+    list_of_outputs.remove('Time')
+    list_of_outputs.remove('grid')
+    list_of_outputs.remove('Sum of Power')
+    list_of_outputs.remove('temperature')
+    list_of_outputs.remove('summary')
+
+    for item in list_of_outputs:
+        if df[item][0] == None:
+            list_of_outputs.remove(item)
+    print(list_of_outputs)
+
+    list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrigerator1', 'solar']
+
+    history = make_model(list_of_outputs) 
+
+    # the main Tkinter window
+    window = Tk()
+    # dimensions of the main window
+    window.geometry("750x750")
+    window.title('Test')
+
+    show_plots(window, history, list_of_outputs)
+
+    # run the gui
+    window.mainloop()
