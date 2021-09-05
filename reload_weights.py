@@ -13,7 +13,7 @@ from LSTM_model import create_dataset
 
 # Specify start date for data collection in "date" and next day in "date2"
 date = '2018-10-30'
-date2 = '2018-11-1'
+date2 = '2018-10-31'
 
 # Load pandas dataframe and specify appliance outputs
 df = pd.read_csv('solar_load_weatherdata.csv')
@@ -23,8 +23,8 @@ list_of_outputs = ['air1', 'clotheswasher1', 'dishwasher1', 'furnace1', 'refrige
 # Load saved model weights
 model = create_LSTM_model(list_of_outputs)
 
-model.load_weights('./model.ckpt')
-# model.load_weights('./SOPmodel.ckpt')
+# model.load_weights('./model.ckpt')
+model.load_weights('./SOPmodel.ckpt')
 
 # Predict on data
 def pred_index(df, initialindex, finalindex):

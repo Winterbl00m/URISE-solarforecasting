@@ -21,9 +21,9 @@ which can only be installed older versions of Python(we used python 3.7)
 2. ### Download Data
     1. Our model uses data from Pacan Street Dataport so you will need access
     https://dataport.pecanstreet.org/
-    2. Download '15minute_data_austin.csv' from https://dataport.pecanstreet.org/academic
-    3. Download 'metadata.csv'
-    4. Download 'weather.csv' from TODO
+    2. Download '15minute_data_austin.csv' from https://dataport.pecanstreet.org/academic under Austin 15-min
+    3. Download 'metadata.csv' from https://dataport.pecanstreet.org/academic under Metadata Report
+    4. Download 'weather.csv' from https://jupyterhub.pecanstreet.org/hub/login within ev_and_weather.zip
     
 
 3. ### Run Model
